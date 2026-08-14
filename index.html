@@ -4,8 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LIVE IN KOBE — Ticketing</title>
+<!-- QR & Scanner Libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
   :root{
     --bg:#070709;
@@ -15,11 +18,12 @@
     --gold-bright:#fce396;
     --gold-dim:#8e7232;
     --purple:#8a5cf6;
+    --purple-bright:#c4b5fd;
     --ink:#f4f4f6;
     --ink-dim:#9a9a9f;
     --green:#4caf6d;
+    --green-bright:#6ee7b7;
     --red:#d6534a;
-    --amber:#e0a530;
     --serif: 'Playfair Display', Georgia, serif;
     --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
@@ -95,6 +99,10 @@
     cursor:pointer;
     transition:all .15s ease;
     font-family:var(--sans);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
   .tab.active{
     background:linear-gradient(180deg,var(--gold-bright),var(--gold));
@@ -115,6 +123,9 @@
     margin:0 0 4px;
     color:var(--gold-bright);
     font-weight:700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
   .panel .hint{
     font-size:12.5px;
@@ -131,6 +142,24 @@
     color:var(--ink-dim);
     margin-bottom:6px;
   }
+  
+  .input-icon-wrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .input-icon-wrap i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold-dim);
+    font-size: 16px;
+  }
+  .input-icon-wrap input[type=text] {
+    padding-left: 42px;
+    margin-bottom: 0;
+  }
+
   input[type=text]{
     width:100%;
     background:var(--bg-panel-2);
@@ -140,11 +169,9 @@
     border-radius:10px;
     font-size:15px;
     font-family:var(--sans);
-    margin-bottom:16px;
   }
   input[type=text]:focus{outline:none;border-color:var(--gold);}
 
-  /* Role Selection Radio Cards */
   .role-selector {
     display: flex;
     gap: 10px;
@@ -161,14 +188,21 @@
     height: 0;
   }
   .role-card {
-    display: block;
-    text-align: center;
-    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 12px;
     background: var(--bg-panel-2);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
+  }
+  .role-card i {
+    font-size: 22px;
+    color: var(--ink-dim);
+    margin-bottom: 4px;
+    transition: color 0.2s;
   }
   .role-card .role-title {
     font-weight: 700;
@@ -183,6 +217,9 @@
   .role-option input:checked + .role-card {
     border-color: var(--gold);
     background: rgba(226,184,87,0.08);
+  }
+  .role-option input:checked + .role-card i {
+    color: var(--gold-bright);
   }
   .role-option input:checked + .role-card .role-title {
     color: var(--gold-bright);
@@ -201,6 +238,10 @@
     cursor:pointer;
     font-family:var(--sans);
     box-shadow: 0 4px 15px rgba(226,184,87,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
   button.primary:active{transform:translateY(1px);}
   button.secondary{
@@ -215,6 +256,10 @@
     cursor:pointer;
     font-family:var(--sans);
     margin-top:12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
 
   .ticket-result{
@@ -248,22 +293,24 @@
     font-size:13.5px;
   }
   .list-item:last-child{border-bottom:none;}
-  .list-item .li-name{color:var(--ink); font-weight: 500;}
+  .list-item .li-name{color:var(--ink); font-weight: 500; display: flex; align-items: center; gap: 6px;}
   .list-item .li-role{font-size: 10px; color: var(--gold); text-transform: uppercase; margin-top:2px;}
   .list-item .li-id{color:var(--ink-dim);font-size:11px;font-family:monospace;}
   .badge{
     font-size:10.5px;
-    padding:3px 9px;
+    padding:4px 10px;
     border-radius:20px;
     font-weight:700;
     letter-spacing:0.04em;
     text-transform:uppercase;
-    white-space:nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
   }
-  .badge.unused{background:rgba(76,175,109,0.15);color:var(--green);}
-  .badge.used{background:rgba(224,165,48,0.15);color:var(--amber);}
+  .badge.unused{background:rgba(255,255,255,0.08);color:var(--ink-dim);}
+  .badge.used{background:rgba(76,175,109,0.15);color:var(--green-bright);}
 
-  /* Scanner */
+  /* Scanner Frame */
   #video-wrap{
     position:relative;
     width:100%;
@@ -287,129 +334,182 @@
     font-size:12px;
     color:var(--ink-dim);
     margin-bottom:14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
   }
 
-  .result-card{
-    position:relative;
-    border-radius:16px;
-    padding:30px 22px 26px;
-    text-align:center;
-    margin-bottom:16px;
-    border:1px solid;
-  }
-  .result-card.valid{
-    background:rgba(76,175,109,0.12);
-    border-color:var(--green);
-  }
-  .result-card.used{
-    background:rgba(224,165,48,0.12);
-    border-color:var(--amber);
-  }
-  .result-card.invalid{
-    background:rgba(214,83,74,0.12);
-    border-color:var(--red);
-  }
-  .result-status{
-    font-family:var(--serif);
-    font-weight:800;
-    font-size:26px;
-    margin-bottom:6px;
-  }
-  .result-card.valid .result-status{color:var(--green);}
-  .result-card.used .result-status{color:var(--amber);}
-  .result-card.invalid .result-status{color:var(--red);}
-
-  /* Small corner badge showing scan/entry count */
-  .corner-badge{
-    position:absolute;
-    top:14px;
-    right:16px;
-    font-size:10px;
-    letter-spacing:0.05em;
-    text-transform:uppercase;
-    color:var(--ink-dim);
-    background:rgba(255,255,255,0.07);
-    border:1px solid rgba(255,255,255,0.12);
-    padding:4px 10px;
-    border-radius:20px;
-    font-weight:700;
-  }
-
-  /* Role chip inside scan result */
-  .role-chip{
-    display:inline-block;
-    margin:2px 0 12px;
-    padding:4px 13px;
-    border-radius:20px;
-    font-size:11px;
-    font-weight:700;
-    letter-spacing:0.07em;
-    text-transform:uppercase;
-  }
-  .role-chip.performer{
-    background:rgba(138,92,246,0.18);
-    color:#c4b5fd;
-    border:1px solid rgba(138,92,246,0.4);
-  }
-  .role-chip.customer{
-    background:rgba(226,184,87,0.18);
-    color:var(--gold-bright);
-    border:1px solid rgba(226,184,87,0.4);
-  }
-
-  /* Repeat-scan notice */
-  .result-repeat{
-    margin-top:12px;
-    padding:9px 12px;
-    background:rgba(224,165,48,0.1);
-    border:1px solid rgba(224,165,48,0.3);
-    border-radius:10px;
-    font-size:12px;
-    line-height:1.5;
-    color:var(--amber);
-  }
-
+  /* COOL SCANNED DISPLAY OVERLAY & ANIMATIONS */
   #scan-overlay{
     position:fixed;
     inset:0;
-    background:rgba(6,5,4,0.88);
-    backdrop-filter:blur(6px);
+    background:rgba(4, 4, 6, 0.85);
+    backdrop-filter:blur(12px);
     display:flex;
     align-items:center;
     justify-content:center;
     z-index:999;
-    padding:24px;
+    padding:20px;
     opacity:0;
     pointer-events:none;
-    transition:opacity .15s ease;
+    transition:opacity .2s ease;
   }
   #scan-overlay.show{
     opacity:1;
     pointer-events:all;
   }
-  #scan-overlay .result-card{
+
+  .result-card{
+    position:relative;
+    border-radius:24px;
+    padding:32px 24px 26px;
+    text-align:center;
     max-width:380px;
     width:100%;
-    animation:pop .18s ease;
+    border:1px solid;
+    animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    overflow: hidden;
   }
-  @keyframes pop{
-    from{ transform:scale(0.92); opacity:0; }
-    to{ transform:scale(1); opacity:1; }
+
+  @keyframes bounceIn {
+    0% { transform: scale(0.7); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
   }
-  #scan-overlay .result-status{ font-size:30px; }
-  #scan-overlay .result-guestname{ font-size:25px; }
-  #scan-overlay button.primary{
-    margin-top:18px;
+
+  /* Animated Scanner Pulse Ring Behind Icon */
+  .animated-icon-box {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
   }
+
+  .pulse-ring {
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    animation: pulseRing 1.8s infinite ease-out;
+  }
+
+  @keyframes pulseRing {
+    0% { transform: scale(0.8); opacity: 0.8; }
+    100% { transform: scale(1.4); opacity: 0; }
+  }
+
+  .animated-icon-box i {
+    font-size: 38px;
+    z-index: 2;
+  }
+
+  .scan-count-badge {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 5px 11px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--gold-bright);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Customer Style Glow */
+  .result-card.valid-customer{
+    background: linear-gradient(180deg, rgba(76,175,109,0.22), rgba(17,17,22,0.96));
+    border-color: rgba(110,231,183,0.5);
+  }
+  .result-card.valid-customer .animated-icon-box {
+    background: rgba(76,175,109,0.2);
+    color: var(--green-bright);
+  }
+  .result-card.valid-customer .pulse-ring {
+    border: 2px solid var(--green-bright);
+  }
+
+  /* Performer Style Glow */
+  .result-card.valid-performer{
+    background: linear-gradient(180deg, rgba(138,92,246,0.25), rgba(17,17,22,0.96));
+    border-color: rgba(196,181,253,0.5);
+  }
+  .result-card.valid-performer .animated-icon-box {
+    background: rgba(138,92,246,0.2);
+    color: var(--purple-bright);
+  }
+  .result-card.valid-performer .pulse-ring {
+    border: 2px solid var(--purple-bright);
+  }
+
+  /* Invalid Ticket Style */
+  .result-card.invalid{
+    background: linear-gradient(180deg, rgba(214,83,74,0.25), rgba(17,17,22,0.96));
+    border-color: rgba(214,83,74,0.5);
+  }
+  .result-card.invalid .animated-icon-box {
+    background: rgba(214,83,74,0.2);
+    color: var(--red);
+  }
+
+  .result-status{
+    font-family:var(--serif);
+    font-weight:800;
+    font-size:24px;
+    letter-spacing: 0.05em;
+    margin-bottom:2px;
+  }
+  .result-card.valid-customer .result-status{ color:var(--green-bright); }
+  .result-card.valid-performer .result-status{ color:var(--purple-bright); }
+  .result-card.invalid .result-status{ color:var(--red); }
+
+  .result-role-tag{
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.06);
+  }
+  .result-card.valid-customer .result-role-tag{ color: var(--gold-bright); }
+  .result-card.valid-performer .result-role-tag{ color: var(--purple-bright); }
+
   .result-guestname{
     font-family:var(--serif);
-    font-size:22px;
+    font-size:28px;
     color:var(--ink);
     margin-bottom:4px;
+    font-weight: 900;
   }
   .result-sub{
     font-size:12px;
     color:var(--ink-dim);
+    margin-bottom: 6px;
+    font-family: monospace;
+  }
+  .result-history{
+    font-size:11px;
+    color:rgba(255,255,255,0.5);
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
   }
 
   .footer-note{
@@ -419,6 +519,10 @@
     letter-spacing:0.08em;
     margin-top:26px;
     text-transform:uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
   }
   .hidden{display:none !important;}
 </style>
@@ -430,21 +534,22 @@
   <div class="subtitle">Ticketing &amp; Door Check-in</div>
 
   <div class="tabs">
-    <button class="tab active" id="tab-issue">Issue Pass</button>
-    <button class="tab" id="tab-scan">Scan at Door</button>
+    <button class="tab active" id="tab-issue"><i class="bi bi-ticket-perforated-fill"></i> Issue Pass</button>
+    <button class="tab" id="tab-scan"><i class="bi bi-qr-code-scan"></i> Scan at Door</button>
   </div>
 
   <!-- ISSUE PANEL -->
   <div id="panel-issue">
     <div class="panel">
-      <h2>New Pass</h2>
-      <p class="hint">Select the pass type and enter the name to generate a modern digital pass.</p>
+      <h2><i class="bi bi-plus-circle-fill"></i> New Pass</h2>
+      <p class="hint">Select pass type and enter full name to generate high-resolution digital ticket pass.</p>
       
       <label>Pass Type</label>
       <div class="role-selector">
         <label class="role-option">
           <input type="radio" name="pass-role" value="customer" checked>
           <div class="role-card">
+            <i class="bi bi-person-badge"></i>
             <div class="role-title">Customer</div>
             <div class="role-sub">GUEST PASS</div>
           </div>
@@ -452,29 +557,33 @@
         <label class="role-option">
           <input type="radio" name="pass-role" value="performer">
           <div class="role-card">
+            <i class="bi bi-music-note-beamed"></i>
             <div class="role-title">Performer</div>
             <div class="role-sub">ARTIST ACCESS</div>
           </div>
         </label>
       </div>
 
-      <label for="guest-name">Name</label>
-      <input type="text" id="guest-name" placeholder="e.g. Aya Tanaka" />
-      <button class="primary" id="btn-generate">Generate Digital Pass</button>
+      <label for="guest-name">Guest / Performer Name</label>
+      <div class="input-icon-wrap">
+        <i class="bi bi-person-fill"></i>
+        <input type="text" id="guest-name" placeholder="e.g. Aya Tanaka" />
+      </div>
 
-      <!-- Temporary hidden QR canvas -->
+      <button class="primary" id="btn-generate"><i class="bi bi-stars"></i> Generate Digital Pass</button>
+
       <div id="temp-qrcode" class="hidden"></div>
 
       <div class="ticket-result hidden" id="ticket-result">
         <div id="ticket-canvas-container">
-          <canvas id="ticket-canvas" width="600" height="1040"></canvas>
+          <canvas id="ticket-canvas" width="1200" height="1960"></canvas>
         </div>
-        <button class="secondary" id="btn-download">Download Pass Image</button>
+        <button class="secondary" id="btn-download"><i class="bi bi-download"></i> Download Pass Image</button>
       </div>
     </div>
 
     <div class="panel">
-      <h2>Issued Passes</h2>
+      <h2><i class="bi bi-journal-text"></i> Issued Passes</h2>
       <p class="hint" id="issued-empty">No passes issued yet.</p>
       <div class="list" id="issued-list"></div>
     </div>
@@ -483,18 +592,21 @@
   <!-- SCAN PANEL -->
   <div id="panel-scan" class="hidden">
     <div class="panel">
-      <h2>Camera Scan</h2>
-      <p class="hint">Point the camera at the pass QR code or input the ticket ID manually.</p>
+      <h2><i class="bi bi-camera-fill"></i> Camera Scan</h2>
+      <p class="hint">Point camera at pass QR code. Multiple entries are allowed for guests re-entering venue.</p>
       <div id="video-wrap">
         <video id="video" playsinline muted></video>
         <div class="scan-frame"></div>
       </div>
-      <div class="cam-status" id="cam-status">Starting camera…</div>
+      <div class="cam-status" id="cam-status"><i class="bi bi-reception-3"></i> Starting camera…</div>
       <canvas id="canvas" class="hidden"></canvas>
 
-      <label for="manual-id">Manual Ticket ID</label>
-      <input type="text" id="manual-id" placeholder="e.g. LIK-4F8B2C" style="text-transform:uppercase;" />
-      <button class="primary" id="btn-check">Verify Ticket</button>
+      <label for="manual-id">Manual Ticket Lookup</label>
+      <div class="input-icon-wrap">
+        <i class="bi bi-search"></i>
+        <input type="text" id="manual-id" placeholder="e.g. LIK-4F8B2C" style="text-transform:uppercase;" />
+      </div>
+      <button class="primary" id="btn-check"><i class="bi bi-shield-check"></i> Verify Ticket</button>
     </div>
   </div>
 
@@ -502,7 +614,7 @@
     <div id="scan-overlay-inner"></div>
   </div>
 
-  <div class="footer-note">Alchemy Kobe · Sun Sept 13, 2026</div>
+  <div class="footer-note"><i class="bi bi-geo-alt-fill"></i> Alchemy Kobe · Sun Sept 13, 2026</div>
 </div>
 
 <script>
@@ -566,19 +678,13 @@ const ticketResult = document.getElementById('ticket-result');
 const guestNameInput = document.getElementById('guest-name');
 let currentTicketId = '';
 
-// Logical drawing canvas size (the pass "design" coordinate system).
-// The actual canvas pixel buffer is rendered at RENDER_SCALE× this for a crisp, high-res download.
-const PASS_W = 600;
-const PASS_H = 1040;
-const RENDER_SCALE = 3; // 3x for print-quality / retina-sharp downloads
-
 btnGenerate.onclick = async () => {
   const name = guestNameInput.value.trim();
   if(!name){ guestNameInput.focus(); return; }
   
   const role = document.querySelector('input[name="pass-role"]:checked').value;
   btnGenerate.disabled = true;
-  btnGenerate.textContent = 'Creating Pass…';
+  btnGenerate.innerHTML = `<i class="bi bi-arrow-repeat spin"></i> Creating Pass…`;
 
   try{
     const id = genId();
@@ -588,22 +694,20 @@ btnGenerate.onclick = async () => {
       throw new Error('QR library failed to load.');
     }
 
-    await setTicket(id, {
-      name,
-      role,
-      issuedAt: Date.now(),
+    await setTicket(id, { 
+      name, 
+      role, 
       scanCount: 0,
-      firstScanAt: null,
-      lastScanAt: null
+      scanHistory: [],
+      issuedAt: Date.now() 
     });
 
-    // Temp QR render (rendered large so it stays crisp when scaled down onto the high-res pass)
     const tempDiv = document.getElementById('temp-qrcode');
     tempDiv.innerHTML = '';
     new QRCode(tempDiv, {
       text: id,
-      width: 512,
-      height: 512,
+      width: 440,
+      height: 440,
       colorDark: '#0d0d11',
       colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.H
@@ -622,53 +726,44 @@ btnGenerate.onclick = async () => {
     alert('Could not generate ticket: ' + (err && err.message ? err.message : err));
   }finally{
     btnGenerate.disabled = false;
-    btnGenerate.textContent = 'Generate Digital Pass';
+    btnGenerate.innerHTML = `<i class="bi bi-stars"></i> Generate Digital Pass`;
   }
 };
 
 async function drawModernPass(id, name, role, qrImg) {
   const canvas = document.getElementById('ticket-canvas');
-
-  // Render at RENDER_SCALE× resolution for a high-quality, crisp download,
-  // while all drawing code below still works in the simple PASS_W × PASS_H
-  // logical coordinate space.
-  canvas.width = PASS_W * RENDER_SCALE;
-  canvas.height = PASS_H * RENDER_SCALE;
-
   const ctx = canvas.getContext('2d');
-  ctx.setTransform(RENDER_SCALE, 0, 0, RENDER_SCALE, 0, 0);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-
+  
   await document.fonts.ready;
 
-  const w = PASS_W;   // 600
-  const h = PASS_H;   // 1040
+  // Canvas Dimensions
+  const w = canvas.width;  // 1200
+  const h = canvas.height; // 1960
   const isPerformer = role === 'performer';
 
-  // 1. Dark Modern Background
+  // Background Dark Gradient
   ctx.fillStyle = '#0a0a0e';
   ctx.fillRect(0, 0, w, h);
 
-  // Subtle Mesh Gradient Glow
-  const glow = ctx.createRadialGradient(w/2, isPerformer ? 180 : 120, 10, w/2, isPerformer ? 180 : 120, 320);
+  // Background Radial Glow
+  const glow = ctx.createRadialGradient(w/2, isPerformer ? 360 : 240, 20, w/2, isPerformer ? 360 : 240, 640);
   glow.addColorStop(0, isPerformer ? 'rgba(138, 92, 246, 0.22)' : 'rgba(226, 184, 87, 0.18)');
   glow.addColorStop(1, 'transparent');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, w, h);
 
-  // Card Outer Edge Contour
+  // Outer Border Frame
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-  ctx.lineWidth = 2;
-  roundRectPath(ctx, 20, 20, w - 40, h - 40, 24);
+  ctx.lineWidth = 4;
+  roundRectPath(ctx, 40, 40, w - 80, h - 80, 48);
   ctx.stroke();
 
-  // 2. Header Info
+  // Header Eyebrow
   ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-  ctx.font = '600 12px "Inter", sans-serif';
+  ctx.font = '600 24px "Inter", sans-serif';
   ctx.textAlign = 'center';
-  ctx.letterSpacing = '3px';
-  ctx.fillText('LIVE IN KOBE 2026', w / 2, 75);
+  ctx.letterSpacing = '6px';
+  ctx.fillText('LIVE IN KOBE 2026', w / 2, 150);
 
   // Role Pill Badge
   const badgeText = isPerformer ? 'ARTIST ACCESS · 出演者通行証' : 'VIP PASS · 特別招待券';
@@ -676,25 +771,24 @@ async function drawModernPass(id, name, role, qrImg) {
   
   ctx.fillStyle = isPerformer ? 'rgba(138, 92, 246, 0.15)' : 'rgba(226, 184, 87, 0.15)';
   ctx.strokeStyle = badgeColor;
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 3;
   
-  const bw = 320, bh = 34;
-  roundRectPath(ctx, (w - bw) / 2, 95, bw, bh, 17);
+  const bw = 640, bh = 68;
+  roundRectPath(ctx, (w - bw) / 2, 190, bw, bh, 34);
   ctx.fill();
   ctx.stroke();
 
   ctx.fillStyle = isPerformer ? '#c4b5fd' : '#fce396';
-  ctx.font = '700 12px "Noto Sans JP", "Inter", sans-serif';
-  ctx.letterSpacing = '2px';
-  ctx.fillText(badgeText, w / 2, 116);
+  ctx.font = '700 24px "Noto Sans JP", "Inter", sans-serif';
+  ctx.letterSpacing = '4px';
+  ctx.fillText(badgeText, w / 2, 232);
 
-  // 3. Guest Name & Appreciation Note
+  // Guest Name
   ctx.fillStyle = '#ffffff';
-  ctx.font = '700 34px "Playfair Display", serif';
-  ctx.letterSpacing = '1px';
-  ctx.fillText(name, w / 2, 185);
+  ctx.font = '700 68px "Playfair Display", serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText(name, w / 2, 370);
 
-  // Respectful Japanese & English Note
   const subNoteJP = isPerformer 
     ? '素晴らしいパフォーマンスを心より楽しみにしております' 
     : 'ご来場を心よりお待ちしております';
@@ -703,97 +797,102 @@ async function drawModernPass(id, name, role, qrImg) {
     : 'Thank you for joining us. We look forward to seeing you!';
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-  ctx.font = '500 13px "Noto Sans JP", sans-serif';
+  ctx.font = '500 26px "Noto Sans JP", sans-serif';
   ctx.letterSpacing = '0px';
-  ctx.fillText(subNoteJP, w / 2, 220);
+  ctx.fillText(subNoteJP, w / 2, 440);
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-  ctx.font = '400 11.5px "Inter", sans-serif';
-  ctx.fillText(subNoteEN, w / 2, 240);
+  ctx.font = '400 23px "Inter", sans-serif';
+  ctx.fillText(subNoteEN, w / 2, 480);
 
-  // 4. Center QR Section Container
-  const qrBoxY = 275;
+  // QR Section Container
+  const qrBoxY = 540;
   ctx.fillStyle = '#13131a';
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-  ctx.lineWidth = 1;
-  roundRectPath(ctx, 70, qrBoxY, w - 140, 360, 20);
+  ctx.lineWidth = 2;
+  roundRectPath(ctx, 120, qrBoxY, w - 240, 770, 40);
   ctx.fill();
   ctx.stroke();
 
-  // QR Code Image
-  const qrSize = 210;
+  // QR Canvas Render
+  const qrSize = 400;
   const qrX = (w - qrSize) / 2;
-  const qrY = qrBoxY + 30;
+  const qrY = qrBoxY + 50;
 
   ctx.fillStyle = '#ffffff';
-  roundRectPath(ctx, qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 12);
+  roundRectPath(ctx, qrX - 20, qrY - 20, qrSize + 40, qrSize + 40, 24);
   ctx.fill();
   ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
 
-  // Ticket Code Display
+  // Ticket ID Label
   ctx.fillStyle = badgeColor;
-  ctx.font = '700 15px "Inter", monospace';
-  ctx.letterSpacing = '3px';
-  ctx.fillText(id, w / 2, qrBoxY + 300);
+  ctx.font = '700 32px "Inter", monospace';
+  ctx.letterSpacing = '6px';
+  ctx.fillText(id, w / 2, qrBoxY + 575);
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-  ctx.font = '500 10.5px "Noto Sans JP", sans-serif';
+  // EN Guidance (Under Ticket Number)
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '600 22px "Inter", sans-serif';
   ctx.letterSpacing = '1px';
-  ctx.fillText('入場時にこのQRコードをご提示ください', w / 2, qrBoxY + 325);
+  ctx.fillText('Please present this QR code at the entrance / door', w / 2, qrBoxY + 640);
 
-  // 5. Event Details Footer
-  const detailsY = 650;
+  // JP Translation Guidance (Bottom of QR Block)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  ctx.font = '500 21px "Noto Sans JP", sans-serif';
+  ctx.letterSpacing = '1px';
+  ctx.fillText('入場時にこのQRコードをご提示ください', w / 2, qrBoxY + 685);
+
+  // Date & Venue Section
+  const detailsY = 1380;
 
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(60, detailsY);
-  ctx.lineTo(w - 60, detailsY);
+  ctx.moveTo(120, detailsY);
+  ctx.lineTo(w - 120, detailsY);
   ctx.stroke();
 
+  // Date
   ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-  ctx.font = '600 11px "Inter", sans-serif';
-  ctx.letterSpacing = '2px';
-  ctx.fillText('DATE & TIME', w / 2, detailsY + 35);
+  ctx.font = '600 22px "Inter", sans-serif';
+  ctx.letterSpacing = '4px';
+  ctx.fillText('DATE & TIME', w / 2, detailsY + 55);
 
   ctx.fillStyle = '#ffffff';
-  ctx.font = '700 22px "Inter", sans-serif';
+  ctx.font = '700 42px "Inter", sans-serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('13 / 09 / 2026  —  16:00', w / 2, detailsY + 110);
+
+  // Dual-Language Venue Details
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.font = '600 22px "Inter", sans-serif';
+  ctx.letterSpacing = '4px';
+  ctx.fillText('VENUE', w / 2, detailsY + 190);
+
+  // English Address Top
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '600 28px "Inter", sans-serif';
   ctx.letterSpacing = '1px';
-  ctx.fillText('13 / 09 / 2026  —  16:00', w / 2, detailsY + 68);
+  ctx.fillText('Alchemy Kobe', w / 2, detailsY + 235);
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-  ctx.font = '600 11px "Inter", sans-serif';
-  ctx.letterSpacing = '2px';
-  ctx.fillText('VENUE', w / 2, detailsY + 115);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+  ctx.font = '400 22px "Inter", sans-serif';
+  ctx.fillText('3 Chome-5-5 Kitanagasadori, Chuo Ward, Kobe, Hyogo 650-0012', w / 2, detailsY + 275);
 
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '600 16px "Noto Sans JP", sans-serif';
-  ctx.letterSpacing = '0.5px';
-  ctx.fillText('Alchemy Kobe (アルケミー神戸)', w / 2, detailsY + 142);
+  // Japanese Address Bottom
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  ctx.font = '500 24px "Noto Sans JP", sans-serif';
+  ctx.fillText('アルケミー神戸', w / 2, detailsY + 325);
 
-  // Venue address — English first, then Japanese below
   ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
-  ctx.font = '400 12.5px "Inter", sans-serif';
-  ctx.letterSpacing = '0.2px';
-  ctx.fillText('3 Chome-5-5 Kitanagasadori, Chuo Ward,', w / 2, detailsY + 166);
-  ctx.fillText('Kobe, Hyogo 650-0012', w / 2, detailsY + 184);
+  ctx.font = '400 20px "Noto Sans JP", sans-serif';
+  ctx.fillText('〒650-0012 兵庫県神戸市中央区北長狭通3-5-5', w / 2, detailsY + 360);
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
-  ctx.font = '400 12px "Noto Sans JP", sans-serif';
-  ctx.letterSpacing = '0px';
-  ctx.fillText('〒650-0012 兵庫県神戸市中央区北長狭通3丁目5-5', w / 2, detailsY + 208);
-
-  // Divider before closing note
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-  ctx.beginPath();
-  ctx.moveTo(60, detailsY + 232);
-  ctx.lineTo(w - 60, detailsY + 232);
-  ctx.stroke();
-
-  // Express Thank You Note at Bottom
+  // Footer Message
   ctx.fillStyle = badgeColor;
-  ctx.font = '600 12px "Noto Sans JP", sans-serif';
-  ctx.letterSpacing = '1px';
-  ctx.fillText('ご来場ありがとうございます · Thank You', w / 2, h - 55);
+  ctx.font = '600 23px "Noto Sans JP", sans-serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('ご来場ありがとうございます · Thank You', w / 2, h - 85);
 }
 
 function roundRectPath(ctx, x, y, width, height, radius) {
@@ -835,17 +934,20 @@ async function renderIssuedList(){
   for(const [id, t] of entries.slice(0, 50)){
     const row = document.createElement('div');
     row.className = 'list-item';
-    const roleTag = t.role === 'performer' ? 'PERFORMER' : 'CUSTOMER';
-    const scanCount = t.scanCount || 0;
-    const badgeClass = scanCount > 0 ? 'used' : 'unused';
-    const badgeText = scanCount > 0 ? `Checked in ×${scanCount}` : 'Not scanned';
+    const isPerf = t.role === 'performer';
+    const roleTag = isPerf ? 'PERFORMER' : 'CUSTOMER';
+    const icon = isPerf ? '<i class="bi bi-music-note-beamed" style="color:var(--purple-bright)"></i>' : '<i class="bi bi-person-fill" style="color:var(--gold)"></i>';
+    const count = t.scanCount || 0;
+    
     row.innerHTML = `
       <div>
-        <div class="li-name">${escapeHtml(t.name)}</div>
+        <div class="li-name">${icon} ${escapeHtml(t.name)}</div>
         <div class="li-role">${roleTag}</div>
         <div class="li-id">${id}</div>
       </div>
-      <div class="badge ${badgeClass}">${badgeText}</div>
+      <div class="badge ${count > 0 ? 'used' : 'unused'}">
+        ${count > 0 ? `<i class="bi bi-check-circle-fill"></i> Scanned (${count})` : '<i class="bi bi-clock"></i> Unused'}
+      </div>
     `;
     listEl.appendChild(row);
   }
@@ -855,7 +957,7 @@ function escapeHtml(s){
   return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-// ---------- Scan Controls ----------
+// ---------- Scanner Logic ----------
 let stream = null;
 let scanLoopId = null;
 const video = document.getElementById('video');
@@ -866,10 +968,10 @@ let scanLocked = false;
 
 async function startCamera(){
   if(stream) return;
-  camStatus.textContent = 'Requesting camera access…';
+  camStatus.innerHTML = '<i class="bi bi-camera-video"></i> Requesting camera access…';
   camStatus.style.color = '';
   if(typeof jsQR === 'undefined'){
-    camStatus.textContent = 'QR scanning library failed to load.';
+    camStatus.innerHTML = '<i class="bi bi-exclamation-triangle"></i> QR scanning library failed to load.';
     camStatus.style.color = 'var(--red)';
     return;
   }
@@ -877,11 +979,11 @@ async function startCamera(){
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
     video.srcObject = stream;
     await video.play();
-    camStatus.textContent = 'Scanning…';
+    camStatus.innerHTML = '<i class="bi bi-viewfinder"></i> Scanning for QR codes…';
     scanLoop();
   }catch(e){
     console.error('Camera start failed:', e);
-    camStatus.textContent = 'Camera error: ' + (e && e.message ? e.message : e) + ' — use manual entry.';
+    camStatus.innerHTML = '<i class="bi bi-camera-video-off"></i> Camera error — use manual lookup.';
     camStatus.style.color = 'var(--red)';
   }
 }
@@ -903,12 +1005,12 @@ function scanLoop(){
     const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'attemptBoth' });
     if(code && code.data){
       scanLocked = true;
-      camStatus.textContent = 'Detected: ' + code.data;
+      camStatus.innerHTML = '<i class="bi bi-check2-circle"></i> Detected: ' + code.data;
       handleScan(code.data.trim().toUpperCase());
     }
   }catch(err){
     console.error('scanLoop error:', err);
-    camStatus.textContent = 'Scan error: ' + (err && err.message ? err.message : err);
+    camStatus.innerHTML = '<i class="bi bi-exclamation-octagon"></i> Scan error: ' + (err && err.message ? err.message : err);
     camStatus.style.color = 'var(--red)';
   }
 }
@@ -928,18 +1030,18 @@ function hideOverlay(){
   document.getElementById('scan-overlay').classList.remove('show');
   document.getElementById('manual-id').value = '';
   scanLocked = false;
-  const camStatus = document.getElementById('cam-status');
-  camStatus.textContent = 'Scanning…';
+  camStatus.innerHTML = '<i class="bi bi-viewfinder"></i> Scanning for QR codes…';
   camStatus.style.color = '';
 }
 
-function formatTime(ts){
-  if(!ts) return '';
-  return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
 async function handleScan(id){
-  showOverlay(`<div class="result-card"><div class="result-status" style="color:var(--gold-bright);">Checking…</div></div>`);
+  showOverlay(`
+    <div class="result-card">
+      <div class="animated-icon-box" style="background:rgba(226,184,87,0.15); color:var(--gold-bright);">
+        <i class="bi bi-arrow-repeat spin"></i>
+      </div>
+      <div class="result-status" style="color:var(--gold-bright);">VERIFYING PASS…</div>
+    </div>`);
 
   let t;
   try{
@@ -947,9 +1049,12 @@ async function handleScan(id){
   }catch(err){
     showOverlay(`
       <div class="result-card invalid">
-        <div class="result-status">⚠ NETWORK ERROR</div>
+        <div class="animated-icon-box">
+          <i class="bi bi-wifi-off"></i>
+        </div>
+        <div class="result-status">NETWORK ERROR</div>
         <div class="result-sub">Could not reach database. Check internet connection.</div>
-        <button class="primary" onclick="hideOverlay()">Scan Next</button>
+        <button class="primary" onclick="hideOverlay()"><i class="bi bi-arrow-right"></i> Scan Next</button>
       </div>`);
     return;
   }
@@ -957,52 +1062,73 @@ async function handleScan(id){
   if(!t){
     showOverlay(`
       <div class="result-card invalid">
-        <div class="result-status">✕ INVALID</div>
+        <div class="animated-icon-box">
+          <i class="bi bi-x-circle-fill"></i>
+        </div>
+        <div class="result-status">INVALID PASS</div>
         <div class="result-sub">Ticket ID not found: ${escapeHtml(id)}</div>
-        <button class="primary" onclick="hideOverlay()">Scan Next</button>
+        <button class="primary" onclick="hideOverlay()"><i class="bi bi-arrow-right"></i> Scan Next</button>
       </div>`);
     return;
   }
 
-  // Tickets can be scanned more than once (e.g. guests stepping out and returning).
-  // We never block entry — we just track and surface how many times this pass has been used.
-  const prevScanCount = t.scanCount || 0;
-  const prevLastScanAt = t.lastScanAt || null;
-  const isRepeat = prevScanCount > 0;
+  // Multi-Scan Updates
+  const now = Date.now();
+  const currentCount = (t.scanCount || 0) + 1;
+  const history = t.scanHistory || [];
+  history.push(now);
 
-  t.scanCount = prevScanCount + 1;
-  if(!t.firstScanAt) t.firstScanAt = Date.now();
-  t.lastScanAt = Date.now();
+  t.scanCount = currentCount;
+  t.scanHistory = history;
+  t.used = true;
+  t.usedAt = now;
 
   try{
     await setTicket(id, t);
   }catch(err){
     showOverlay(`
       <div class="result-card invalid">
-        <div class="result-status">⚠ NETWORK ERROR</div>
-        <div class="result-sub">Could not save check-in.</div>
-        <button class="primary" onclick="hideOverlay()">Scan Next</button>
+        <div class="animated-icon-box">
+          <i class="bi bi-cloud-slash"></i>
+        </div>
+        <div class="result-status">UPDATE ERROR</div>
+        <div class="result-sub">Could not save check-in state.</div>
+        <button class="primary" onclick="hideOverlay()"><i class="bi bi-arrow-right"></i> Scan Next</button>
       </div>`);
     return;
   }
 
-  const roleTitle = t.role === 'performer' ? 'PERFORMER' : 'CUSTOMER';
-  const roleChipClass = t.role === 'performer' ? 'performer' : 'customer';
+  const isPerformer = t.role === 'performer';
+  const roleTitle = isPerformer 
+    ? '<i class="bi bi-music-note-beamed"></i> PERFORMER ACCESS · 出演者' 
+    : '<i class="bi bi-person-badge"></i> CUSTOMER PASS · 来客';
+  const cardClass = isPerformer ? 'valid-performer' : 'valid-customer';
+  const iconClass = isPerformer ? 'bi-stars' : 'bi-check-lg';
 
-  const repeatNote = isRepeat
-    ? `<div class="result-repeat">⟲ Already checked in ${prevScanCount}× before — last at ${formatTime(prevLastScanAt)}</div>`
-    : '';
+  let historyNote = '';
+  if (currentCount > 1) {
+    const lastTime = new Date(history[history.length - 2]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    historyNote = `<div class="result-history"><i class="bi bi-arrow-return-right"></i> Re-entry approved. Previous scan at ${lastTime}</div>`;
+  } else {
+    historyNote = `<div class="result-history"><i class="bi bi-patch-check"></i> Initial check-in recorded</div>`;
+  }
 
+  // COOL DISPLAY SCAN RESULT OVERLAY WITH ANIMATED GLOW & ICONS
   showOverlay(`
-    <div class="result-card valid">
-      <div class="corner-badge">Entry #${t.scanCount}</div>
-      <div class="result-status">✓ VALID</div>
-      <div class="role-chip ${roleChipClass}">${roleTitle}</div>
+    <div class="result-card ${cardClass}">
+      <div class="scan-count-badge"><i class="bi bi-arrow-repeat"></i> SCAN #${currentCount}</div>
+      <div class="animated-icon-box">
+        <div class="pulse-ring"></div>
+        <i class="bi ${iconClass}"></i>
+      </div>
+      <div class="result-status">ENTRY GRANTED</div>
+      <div class="result-role-tag">${roleTitle}</div>
       <div class="result-guestname">${escapeHtml(t.name)}</div>
-      <div class="result-sub">${id} · checked in now (${formatTime(t.lastScanAt)})</div>
-      ${repeatNote}
-      <button class="primary" onclick="hideOverlay()">Scan Next</button>
+      <div class="result-sub">PASS ID: ${id}</div>
+      ${historyNote}
+      <button class="primary" style="margin-top:18px;" onclick="hideOverlay()"><i class="bi bi-arrow-right-circle-fill"></i> Scan Next Ticket</button>
     </div>`);
+
   renderIssuedList();
 }
 
