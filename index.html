@@ -167,35 +167,30 @@
     font-size:13px;
     cursor:pointer;
     font-family:var(--sans);
-    margin-top:8px;
+    margin-top:12px;
   }
 
   .ticket-result{
     margin-top:18px;
     text-align:center;
-    padding:20px;
+    padding:16px;
     background:var(--bg-panel-2);
     border-radius:12px;
     border:1px solid rgba(212,175,90,0.2);
   }
-  .ticket-result .qr-box{
-    display:inline-block;
-    background:#fff;
-    padding:10px;
-    border-radius:8px;
-    margin-bottom:12px;
+  
+  /* Ticket Canvas */
+  #ticket-canvas-container {
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
   }
-  .ticket-result .id{
-    font-family:'Inter', monospace;
-    font-size:13px;
-    letter-spacing:0.08em;
-    color:var(--gold-bright);
-    margin-bottom:2px;
-  }
-  .ticket-result .name{
-    font-family:var(--serif);
-    font-size:18px;
-    color:var(--ink);
+  #ticket-canvas {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   }
 
   .list{margin-top:6px;}
@@ -346,16 +341,19 @@
   <div id="panel-issue">
     <div class="panel">
       <h2>New ticket</h2>
-      <p class="hint">Enter the guest's name to generate their ticket QR code. Send them the image they show it at the door.</p>
+      <p class="hint">Enter the guest's name to generate their digital ticket pass. Send them the downloaded image to show at the door.</p>
       <label for="guest-name">Guest name</label>
       <input type="text" id="guest-name" placeholder="e.g. Aya Tanaka" />
-      <button class="primary" id="btn-generate">Generate Ticket</button>
+      <button class="primary" id="btn-generate">Generate Ticket Pass</button>
+
+      <!-- Temporary hidden QR div for library rendering -->
+      <div id="temp-qrcode" class="hidden"></div>
 
       <div class="ticket-result hidden" id="ticket-result">
-        <div class="qr-box"><div id="qrcode"></div></div>
-        <div class="id" id="ticket-id-display"></div>
-        <div class="name" id="ticket-name-display"></div>
-        <button class="secondary" id="btn-download">Download QR Image</button>
+        <div id="ticket-canvas-container">
+          <canvas id="ticket-canvas" width="600" height="1050"></canvas>
+        </div>
+        <button class="secondary" id="btn-download">Download Digital Ticket</button>
       </div>
     </div>
 
@@ -397,16 +395,12 @@
 const FIREBASE_URL = 'https://live-in-kobe-default-rtdb.firebaseio.com';
 
 async function getTicket(id){
-  try{
-    const res = await fetch(`${FIREBASE_URL}/tickets/${id}.json`);
-    if(!res.ok) throw new Error('Firebase request failed: ' + res.status);
-    const data = await res.json();
-    return data || null;
-  }catch(e){
-    console.error('getTicket failed:', e);
-    return null;
-  }
+  const res = await fetch(`${FIREBASE_URL}/tickets/${id}.json`);
+  if(!res.ok) throw new Error('Firebase request failed: ' + res.status);
+  const data = await res.json();
+  return data || null;
 }
+
 async function setTicket(id, data){
   const res = await fetch(`${FIREBASE_URL}/tickets/${id}.json`, {
     method: 'PUT',
@@ -415,6 +409,7 @@ async function setTicket(id, data){
   });
   if(!res.ok) throw new Error('Could not save ticket (Firebase status ' + res.status + ')');
 }
+
 async function getAllTickets(){
   try{
     const res = await fetch(`${FIREBASE_URL}/tickets.json`);
@@ -451,41 +446,50 @@ tabScan.onclick = () => {
   startCamera();
 };
 
-// ---------- issue ticket ----------
+// ---------- issue ticket & canvas generator ----------
 const btnGenerate = document.getElementById('btn-generate');
 const ticketResult = document.getElementById('ticket-result');
 const guestNameInput = document.getElementById('guest-name');
-let currentQR = null;
+let currentTicketId = '';
 
 btnGenerate.onclick = async () => {
   const name = guestNameInput.value.trim();
   if(!name){ guestNameInput.focus(); return; }
   btnGenerate.disabled = true;
-  btnGenerate.textContent = 'Generating…';
+  btnGenerate.textContent = 'Generating Pass…';
 
   try{
     const id = genId();
+    currentTicketId = id;
 
     if(typeof QRCode === 'undefined'){
       throw new Error('QR library failed to load (check network/CDN access).');
     }
 
+    // Save ticket data
     await setTicket(id, { name, used:false, usedAt:null, issuedAt: Date.now() });
 
-    document.getElementById('qrcode').innerHTML = '';
-    currentQR = new QRCode(document.getElementById('qrcode'), {
+    // 1. Generate QR temporarily to capture image
+    const tempDiv = document.getElementById('temp-qrcode');
+    tempDiv.innerHTML = '';
+    const qrcode = new QRCode(tempDiv, {
       text: id,
-      width: 200,
-      height: 200,
-      colorDark: '#161310',
+      width: 260,
+      height: 260,
+      colorDark: '#12100d',
       colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.H
     });
 
-    document.getElementById('ticket-id-display').textContent = id;
-    document.getElementById('ticket-name-display').textContent = name;
-    ticketResult.classList.remove('hidden');
+    // Wait briefly for library image generation
+    await new Promise(r => setTimeout(r, 150));
 
+    const qrImg = tempDiv.querySelector('img') || tempDiv.querySelector('canvas');
+    
+    // 2. Render Full Digital Pass on Canvas
+    await drawDigitalPass(id, name, qrImg);
+
+    ticketResult.classList.remove('hidden');
     guestNameInput.value = '';
     await renderIssuedList();
   }catch(err){
@@ -493,19 +497,148 @@ btnGenerate.onclick = async () => {
     alert('Could not generate ticket: ' + (err && err.message ? err.message : err));
   }finally{
     btnGenerate.disabled = false;
-    btnGenerate.textContent = 'Generate Ticket';
+    btnGenerate.textContent = 'Generate Ticket Pass';
   }
 };
 
+async function drawDigitalPass(id, guestName, qrImageElement) {
+  const canvas = document.getElementById('ticket-canvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Ensure custom web fonts are loaded prior to canvas rendering
+  await document.fonts.ready;
+
+  const w = canvas.width;  // 600
+  const h = canvas.height; // 1050
+
+  // Background
+  ctx.fillStyle = '#0f0e0c';
+  ctx.fillRect(0, 0, w, h);
+
+  // Subtle Outer Border
+  ctx.strokeStyle = '#3a3122';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(16, 16, w - 32, h - 32);
+
+  // Decorative Inner Gold Frame
+  ctx.strokeStyle = '#d4af5a';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(30, 30, w - 60, h - 60);
+
+  // Corner Accents
+  const cs = 18;
+  const corners = [
+    [30, 30], [w - 30, 30],
+    [30, h - 30], [w - 30, h - 30]
+  ];
+  ctx.fillStyle = '#f0d38a';
+  corners.forEach(([cx, cy]) => {
+    ctx.fillRect(cx - 4, cy - 4, 8, 8);
+  });
+
+  // Top Subheader
+  ctx.fillStyle = '#8a723f';
+  ctx.font = '600 13px "Inter", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.letterSpacing = '4px';
+  ctx.fillText('PREMIUM LIVE SHOWCASE 2026', w / 2, 85);
+
+  // Title
+  ctx.fillStyle = '#f0d38a';
+  ctx.font = '900 42px "Playfair Display", serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('LIVE IN KOBE', w / 2, 140);
+
+  // Divider Line 1
+  drawDivider(ctx, 175, w);
+
+  // Ticket ID Badge
+  ctx.fillStyle = '#a89f8f';
+  ctx.font = '600 13px "Inter", sans-serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('TICKET ID: ' + id, w / 2, 215);
+
+  // Draw QR Code Container
+  const qrSize = 250;
+  const qrX = (w - qrSize) / 2;
+  const qrY = 245;
+
+  ctx.fillStyle = '#ffffff';
+  ctx.roundRect ? ctx.roundRect(qrX - 12, qrY - 12, qrSize + 24, qrSize + 24, 12) : ctx.fillRect(qrX - 12, qrY - 12, qrSize + 24, qrSize + 24);
+  ctx.fill();
+
+  // Draw QR Code Image
+  ctx.drawImage(qrImageElement, qrX, qrY, qrSize, qrSize);
+
+  // Guest Label
+  ctx.fillStyle = '#8a723f';
+  ctx.font = '600 12px "Inter", sans-serif';
+  ctx.letterSpacing = '3px';
+  ctx.fillText('GUEST NAME', w / 2, 550);
+
+  // Guest Name Value
+  ctx.fillStyle = '#f2ede1';
+  ctx.font = '700 32px "Playfair Display", serif';
+  ctx.letterSpacing = '1px';
+  ctx.fillText(guestName.toUpperCase(), w / 2, 595);
+
+  // Divider Line 2
+  drawDivider(ctx, 635, w);
+
+  // Instructions
+  ctx.fillStyle = '#d4af5a';
+  ctx.font = '600 13px "Inter", sans-serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('PRESENT THIS QR CODE AT THE DOOR', w / 2, 680);
+
+  // Event Date & Time
+  ctx.fillStyle = '#f2ede1';
+  ctx.font = '700 24px "Inter", sans-serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('13 / 09 / 2026  ·  TIME 16:00', w / 2, 725);
+
+  // Divider Line 3
+  drawDivider(ctx, 770, w);
+
+  // Venue / Footer Details
+  ctx.fillStyle = '#a89f8f';
+  ctx.font = '500 14px "Inter", sans-serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('ALCHEMY KOBE', w / 2, 820);
+
+  ctx.fillStyle = '#8a723f';
+  ctx.font = '600 11px "Inter", sans-serif';
+  ctx.letterSpacing = '3px';
+  ctx.fillText('SUN SEPT 13, 2026 — DOORS OPEN 15:30', w / 2, 850);
+
+  // Pass Type Pill Box
+  ctx.strokeStyle = '#8a723f';
+  ctx.lineWidth = 1;
+  const bw = 160, bh = 28;
+  const bx = (w - bw) / 2, by = 900;
+  ctx.strokeRect(bx, by, bw, bh);
+
+  ctx.fillStyle = '#f0d38a';
+  ctx.font = '700 11px "Inter", sans-serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('VIP ENTRY PASS', w / 2, by + 18);
+}
+
+function drawDivider(ctx, y, width) {
+  ctx.strokeStyle = 'rgba(212, 175, 90, 0.3)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(60, y);
+  ctx.lineTo(width - 60, y);
+  ctx.stroke();
+}
+
 document.getElementById('btn-download').onclick = () => {
-  setTimeout(() => {
-    const img = document.querySelector('#qrcode img') || document.querySelector('#qrcode canvas');
-    if(!img) return;
-    const link = document.createElement('a');
-    link.download = document.getElementById('ticket-id-display').textContent + '.png';
-    link.href = img.tagName === 'CANVAS' ? img.toDataURL() : img.src;
-    link.click();
-  }, 100);
+  const canvas = document.getElementById('ticket-canvas');
+  const link = document.createElement('a');
+  link.download = `Ticket-${currentTicketId}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
 };
 
 async function renderIssuedList(){
