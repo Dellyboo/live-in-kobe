@@ -15,6 +15,7 @@
     --gold-bright:#fce396;
     --gold-dim:#8e7232;
     --purple:#8a5cf6;
+    --purple-bright:#c4b5fd;
     --ink:#f4f4f6;
     --ink-dim:#9a9a9f;
     --green:#4caf6d;
@@ -144,7 +145,6 @@
   }
   input[type=text]:focus{outline:none;border-color:var(--gold);}
 
-  /* Role Selection Radio Cards */
   .role-selector {
     display: flex;
     gap: 10px;
@@ -258,10 +258,9 @@
     font-weight:700;
     letter-spacing:0.04em;
     text-transform:uppercase;
-    white-space:nowrap;
   }
-  .badge.unused{background:rgba(76,175,109,0.15);color:var(--green);}
-  .badge.used{background:rgba(224,165,48,0.15);color:var(--amber);}
+  .badge.unused{background:rgba(255,255,255,0.08);color:var(--ink-dim);}
+  .badge.used{background:rgba(76,175,109,0.15);color:var(--green);}
 
   /* Scanner */
   #video-wrap{
@@ -289,86 +288,7 @@
     margin-bottom:14px;
   }
 
-  .result-card{
-    position:relative;
-    border-radius:16px;
-    padding:30px 22px 26px;
-    text-align:center;
-    margin-bottom:16px;
-    border:1px solid;
-  }
-  .result-card.valid{
-    background:rgba(76,175,109,0.12);
-    border-color:var(--green);
-  }
-  .result-card.used{
-    background:rgba(224,165,48,0.12);
-    border-color:var(--amber);
-  }
-  .result-card.invalid{
-    background:rgba(214,83,74,0.12);
-    border-color:var(--red);
-  }
-  .result-status{
-    font-family:var(--serif);
-    font-weight:800;
-    font-size:26px;
-    margin-bottom:6px;
-  }
-  .result-card.valid .result-status{color:var(--green);}
-  .result-card.used .result-status{color:var(--amber);}
-  .result-card.invalid .result-status{color:var(--red);}
-
-  /* Small corner badge showing scan/entry count */
-  .corner-badge{
-    position:absolute;
-    top:14px;
-    right:16px;
-    font-size:10px;
-    letter-spacing:0.05em;
-    text-transform:uppercase;
-    color:var(--ink-dim);
-    background:rgba(255,255,255,0.07);
-    border:1px solid rgba(255,255,255,0.12);
-    padding:4px 10px;
-    border-radius:20px;
-    font-weight:700;
-  }
-
-  /* Role chip inside scan result */
-  .role-chip{
-    display:inline-block;
-    margin:2px 0 12px;
-    padding:4px 13px;
-    border-radius:20px;
-    font-size:11px;
-    font-weight:700;
-    letter-spacing:0.07em;
-    text-transform:uppercase;
-  }
-  .role-chip.performer{
-    background:rgba(138,92,246,0.18);
-    color:#c4b5fd;
-    border:1px solid rgba(138,92,246,0.4);
-  }
-  .role-chip.customer{
-    background:rgba(226,184,87,0.18);
-    color:var(--gold-bright);
-    border:1px solid rgba(226,184,87,0.4);
-  }
-
-  /* Repeat-scan notice */
-  .result-repeat{
-    margin-top:12px;
-    padding:9px 12px;
-    background:rgba(224,165,48,0.1);
-    border:1px solid rgba(224,165,48,0.3);
-    border-radius:10px;
-    font-size:12px;
-    line-height:1.5;
-    color:var(--amber);
-  }
-
+  /* Scan Overlay Styling */
   #scan-overlay{
     position:fixed;
     inset:0;
@@ -387,29 +307,87 @@
     opacity:1;
     pointer-events:all;
   }
-  #scan-overlay .result-card{
+
+  .result-card{
+    position:relative;
+    border-radius:20px;
+    padding:28px 22px;
+    text-align:center;
     max-width:380px;
     width:100%;
+    border:1px solid;
     animation:pop .18s ease;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.6);
   }
   @keyframes pop{
     from{ transform:scale(0.92); opacity:0; }
     to{ transform:scale(1); opacity:1; }
   }
-  #scan-overlay .result-status{ font-size:30px; }
-  #scan-overlay .result-guestname{ font-size:25px; }
-  #scan-overlay button.primary{
-    margin-top:18px;
+
+  .scan-count-badge {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--gold-bright);
   }
+
+  .result-card.valid-customer{
+    background: linear-gradient(180deg, rgba(76,175,109,0.16), rgba(17,17,22,0.95));
+    border-color: var(--green);
+  }
+  .result-card.valid-performer{
+    background: linear-gradient(180deg, rgba(138,92,246,0.18), rgba(17,17,22,0.95));
+    border-color: var(--purple-bright);
+  }
+  .result-card.invalid{
+    background: rgba(214,83,74,0.12);
+    border-color: var(--red);
+  }
+
+  .result-status{
+    font-family:var(--serif);
+    font-weight:800;
+    font-size:26px;
+    margin-bottom:2px;
+  }
+  .result-card.valid-customer .result-status{color:var(--green);}
+  .result-card.valid-performer .result-status{color:var(--purple-bright);}
+  .result-card.invalid .result-status{color:var(--red);}
+
+  .result-role-tag{
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .result-card.valid-customer .result-role-tag{ color: var(--gold-bright); }
+  .result-card.valid-performer .result-role-tag{ color: var(--purple-bright); }
+
   .result-guestname{
     font-family:var(--serif);
-    font-size:22px;
+    font-size:26px;
     color:var(--ink);
     margin-bottom:4px;
   }
   .result-sub{
     font-size:12px;
     color:var(--ink-dim);
+    margin-bottom: 4px;
+  }
+  .result-history{
+    font-size:11px;
+    color:rgba(255,255,255,0.45);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(255,255,255,0.12);
   }
 
   .footer-note{
@@ -438,7 +416,7 @@
   <div id="panel-issue">
     <div class="panel">
       <h2>New Pass</h2>
-      <p class="hint">Select the pass type and enter the name to generate a modern digital pass.</p>
+      <p class="hint">Select pass type and enter full name to generate high-resolution digital ticket pass.</p>
       
       <label>Pass Type</label>
       <div class="role-selector">
@@ -462,12 +440,12 @@
       <input type="text" id="guest-name" placeholder="e.g. Aya Tanaka" />
       <button class="primary" id="btn-generate">Generate Digital Pass</button>
 
-      <!-- Temporary hidden QR canvas -->
       <div id="temp-qrcode" class="hidden"></div>
 
       <div class="ticket-result hidden" id="ticket-result">
         <div id="ticket-canvas-container">
-          <canvas id="ticket-canvas" width="600" height="1040"></canvas>
+          <!-- Hi-DPI Canvas Rendering -->
+          <canvas id="ticket-canvas" width="1200" height="1960"></canvas>
         </div>
         <button class="secondary" id="btn-download">Download Pass Image</button>
       </div>
@@ -484,7 +462,7 @@
   <div id="panel-scan" class="hidden">
     <div class="panel">
       <h2>Camera Scan</h2>
-      <p class="hint">Point the camera at the pass QR code or input the ticket ID manually.</p>
+      <p class="hint">Point camera at pass QR code. Multiple entries are allowed for guests re-entering venue.</p>
       <div id="video-wrap">
         <video id="video" playsinline muted></video>
         <div class="scan-frame"></div>
@@ -566,12 +544,6 @@ const ticketResult = document.getElementById('ticket-result');
 const guestNameInput = document.getElementById('guest-name');
 let currentTicketId = '';
 
-// Logical drawing canvas size (the pass "design" coordinate system).
-// The actual canvas pixel buffer is rendered at RENDER_SCALE× this for a crisp, high-res download.
-const PASS_W = 600;
-const PASS_H = 1040;
-const RENDER_SCALE = 3; // 3x for print-quality / retina-sharp downloads
-
 btnGenerate.onclick = async () => {
   const name = guestNameInput.value.trim();
   if(!name){ guestNameInput.focus(); return; }
@@ -588,22 +560,21 @@ btnGenerate.onclick = async () => {
       throw new Error('QR library failed to load.');
     }
 
-    await setTicket(id, {
-      name,
-      role,
-      issuedAt: Date.now(),
+    await setTicket(id, { 
+      name, 
+      role, 
       scanCount: 0,
-      firstScanAt: null,
-      lastScanAt: null
+      scanHistory: [],
+      issuedAt: Date.now() 
     });
 
-    // Temp QR render (rendered large so it stays crisp when scaled down onto the high-res pass)
+    // Generate high-density temp QR
     const tempDiv = document.getElementById('temp-qrcode');
     tempDiv.innerHTML = '';
     new QRCode(tempDiv, {
       text: id,
-      width: 512,
-      height: 512,
+      width: 440,
+      height: 440,
       colorDark: '#0d0d11',
       colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.H
@@ -628,47 +599,38 @@ btnGenerate.onclick = async () => {
 
 async function drawModernPass(id, name, role, qrImg) {
   const canvas = document.getElementById('ticket-canvas');
-
-  // Render at RENDER_SCALE× resolution for a high-quality, crisp download,
-  // while all drawing code below still works in the simple PASS_W × PASS_H
-  // logical coordinate space.
-  canvas.width = PASS_W * RENDER_SCALE;
-  canvas.height = PASS_H * RENDER_SCALE;
-
   const ctx = canvas.getContext('2d');
-  ctx.setTransform(RENDER_SCALE, 0, 0, RENDER_SCALE, 0, 0);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
-
+  
   await document.fonts.ready;
 
-  const w = PASS_W;   // 600
-  const h = PASS_H;   // 1040
+  // Hi-DPI Resolution Dimensions
+  const w = canvas.width;  // 1200
+  const h = canvas.height; // 1960
   const isPerformer = role === 'performer';
 
   // 1. Dark Modern Background
   ctx.fillStyle = '#0a0a0e';
   ctx.fillRect(0, 0, w, h);
 
-  // Subtle Mesh Gradient Glow
-  const glow = ctx.createRadialGradient(w/2, isPerformer ? 180 : 120, 10, w/2, isPerformer ? 180 : 120, 320);
+  // Background Mesh Glow
+  const glow = ctx.createRadialGradient(w/2, isPerformer ? 360 : 240, 20, w/2, isPerformer ? 360 : 240, 640);
   glow.addColorStop(0, isPerformer ? 'rgba(138, 92, 246, 0.22)' : 'rgba(226, 184, 87, 0.18)');
   glow.addColorStop(1, 'transparent');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, w, h);
 
-  // Card Outer Edge Contour
+  // Card Outer Edge Frame
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-  ctx.lineWidth = 2;
-  roundRectPath(ctx, 20, 20, w - 40, h - 40, 24);
+  ctx.lineWidth = 4;
+  roundRectPath(ctx, 40, 40, w - 80, h - 80, 48);
   ctx.stroke();
 
-  // 2. Header Info
+  // 2. Header Details
   ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-  ctx.font = '600 12px "Inter", sans-serif';
+  ctx.font = '600 24px "Inter", sans-serif';
   ctx.textAlign = 'center';
-  ctx.letterSpacing = '3px';
-  ctx.fillText('LIVE IN KOBE 2026', w / 2, 75);
+  ctx.letterSpacing = '6px';
+  ctx.fillText('LIVE IN KOBE 2026', w / 2, 150);
 
   // Role Pill Badge
   const badgeText = isPerformer ? 'ARTIST ACCESS · 出演者通行証' : 'VIP PASS · 特別招待券';
@@ -676,25 +638,24 @@ async function drawModernPass(id, name, role, qrImg) {
   
   ctx.fillStyle = isPerformer ? 'rgba(138, 92, 246, 0.15)' : 'rgba(226, 184, 87, 0.15)';
   ctx.strokeStyle = badgeColor;
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 3;
   
-  const bw = 320, bh = 34;
-  roundRectPath(ctx, (w - bw) / 2, 95, bw, bh, 17);
+  const bw = 640, bh = 68;
+  roundRectPath(ctx, (w - bw) / 2, 190, bw, bh, 34);
   ctx.fill();
   ctx.stroke();
 
   ctx.fillStyle = isPerformer ? '#c4b5fd' : '#fce396';
-  ctx.font = '700 12px "Noto Sans JP", "Inter", sans-serif';
-  ctx.letterSpacing = '2px';
-  ctx.fillText(badgeText, w / 2, 116);
+  ctx.font = '700 24px "Noto Sans JP", "Inter", sans-serif';
+  ctx.letterSpacing = '4px';
+  ctx.fillText(badgeText, w / 2, 232);
 
-  // 3. Guest Name & Appreciation Note
+  // 3. Guest Name & Appreciation
   ctx.fillStyle = '#ffffff';
-  ctx.font = '700 34px "Playfair Display", serif';
-  ctx.letterSpacing = '1px';
-  ctx.fillText(name, w / 2, 185);
+  ctx.font = '700 68px "Playfair Display", serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText(name, w / 2, 370);
 
-  // Respectful Japanese & English Note
   const subNoteJP = isPerformer 
     ? '素晴らしいパフォーマンスを心より楽しみにしております' 
     : 'ご来場を心よりお待ちしております';
@@ -703,97 +664,95 @@ async function drawModernPass(id, name, role, qrImg) {
     : 'Thank you for joining us. We look forward to seeing you!';
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-  ctx.font = '500 13px "Noto Sans JP", sans-serif';
+  ctx.font = '500 26px "Noto Sans JP", sans-serif';
   ctx.letterSpacing = '0px';
-  ctx.fillText(subNoteJP, w / 2, 220);
+  ctx.fillText(subNoteJP, w / 2, 440);
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-  ctx.font = '400 11.5px "Inter", sans-serif';
-  ctx.fillText(subNoteEN, w / 2, 240);
+  ctx.font = '400 23px "Inter", sans-serif';
+  ctx.fillText(subNoteEN, w / 2, 480);
 
-  // 4. Center QR Section Container
-  const qrBoxY = 275;
+  // 4. Center QR Section Box
+  const qrBoxY = 550;
   ctx.fillStyle = '#13131a';
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-  ctx.lineWidth = 1;
-  roundRectPath(ctx, 70, qrBoxY, w - 140, 360, 20);
+  ctx.lineWidth = 2;
+  roundRectPath(ctx, 140, qrBoxY, w - 280, 720, 40);
   ctx.fill();
   ctx.stroke();
 
-  // QR Code Image
-  const qrSize = 210;
+  // QR Canvas Render
+  const qrSize = 420;
   const qrX = (w - qrSize) / 2;
-  const qrY = qrBoxY + 30;
+  const qrY = qrBoxY + 60;
 
   ctx.fillStyle = '#ffffff';
-  roundRectPath(ctx, qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 12);
+  roundRectPath(ctx, qrX - 20, qrY - 20, qrSize + 40, qrSize + 40, 24);
   ctx.fill();
   ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
 
-  // Ticket Code Display
+  // Ticket ID Label
   ctx.fillStyle = badgeColor;
-  ctx.font = '700 15px "Inter", monospace';
-  ctx.letterSpacing = '3px';
-  ctx.fillText(id, w / 2, qrBoxY + 300);
+  ctx.font = '700 30px "Inter", monospace';
+  ctx.letterSpacing = '6px';
+  ctx.fillText(id, w / 2, qrBoxY + 600);
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-  ctx.font = '500 10.5px "Noto Sans JP", sans-serif';
-  ctx.letterSpacing = '1px';
-  ctx.fillText('入場時にこのQRコードをご提示ください', w / 2, qrBoxY + 325);
+  ctx.font = '500 21px "Noto Sans JP", sans-serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('入場時にこのQRコードをご提示ください', w / 2, qrBoxY + 650);
 
-  // 5. Event Details Footer
-  const detailsY = 650;
+  // 5. Date / Time & Venue Details
+  const detailsY = 1350;
 
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(60, detailsY);
-  ctx.lineTo(w - 60, detailsY);
+  ctx.moveTo(120, detailsY);
+  ctx.lineTo(w - 120, detailsY);
   ctx.stroke();
 
+  // Date
   ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-  ctx.font = '600 11px "Inter", sans-serif';
-  ctx.letterSpacing = '2px';
-  ctx.fillText('DATE & TIME', w / 2, detailsY + 35);
+  ctx.font = '600 22px "Inter", sans-serif';
+  ctx.letterSpacing = '4px';
+  ctx.fillText('DATE & TIME', w / 2, detailsY + 65);
 
   ctx.fillStyle = '#ffffff';
-  ctx.font = '700 22px "Inter", sans-serif';
+  ctx.font = '700 44px "Inter", sans-serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('13 / 09 / 2026  —  16:00', w / 2, detailsY + 125);
+
+  // Dual-Language Venue Formatting
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.font = '600 22px "Inter", sans-serif';
+  ctx.letterSpacing = '4px';
+  ctx.fillText('VENUE', w / 2, detailsY + 215);
+
+  // English Venue Address
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '600 28px "Inter", sans-serif';
   ctx.letterSpacing = '1px';
-  ctx.fillText('13 / 09 / 2026  —  16:00', w / 2, detailsY + 68);
+  ctx.fillText('Alchemy Kobe', w / 2, detailsY + 265);
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-  ctx.font = '600 11px "Inter", sans-serif';
-  ctx.letterSpacing = '2px';
-  ctx.fillText('VENUE', w / 2, detailsY + 115);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+  ctx.font = '400 22px "Inter", sans-serif';
+  ctx.fillText('3 Chome-5-5 Kitanagasadori, Chuo Ward, Kobe, Hyogo 650-0012', w / 2, detailsY + 305);
 
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '600 16px "Noto Sans JP", sans-serif';
-  ctx.letterSpacing = '0.5px';
-  ctx.fillText('Alchemy Kobe (アルケミー神戸)', w / 2, detailsY + 142);
+  // Japanese Venue Address Below
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  ctx.font = '500 24px "Noto Sans JP", sans-serif';
+  ctx.fillText('アルケミー神戸', w / 2, detailsY + 360);
 
-  // Venue address — English first, then Japanese below
   ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
-  ctx.font = '400 12.5px "Inter", sans-serif';
-  ctx.letterSpacing = '0.2px';
-  ctx.fillText('3 Chome-5-5 Kitanagasadori, Chuo Ward,', w / 2, detailsY + 166);
-  ctx.fillText('Kobe, Hyogo 650-0012', w / 2, detailsY + 184);
+  ctx.font = '400 20px "Noto Sans JP", sans-serif';
+  ctx.fillText('〒650-0012 兵庫県神戸市中央区北長狭通3-5-5', w / 2, detailsY + 395);
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
-  ctx.font = '400 12px "Noto Sans JP", sans-serif';
-  ctx.letterSpacing = '0px';
-  ctx.fillText('〒650-0012 兵庫県神戸市中央区北長狭通3丁目5-5', w / 2, detailsY + 208);
-
-  // Divider before closing note
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-  ctx.beginPath();
-  ctx.moveTo(60, detailsY + 232);
-  ctx.lineTo(w - 60, detailsY + 232);
-  ctx.stroke();
-
-  // Express Thank You Note at Bottom
+  // Express Gratitude Footer
   ctx.fillStyle = badgeColor;
-  ctx.font = '600 12px "Noto Sans JP", sans-serif';
-  ctx.letterSpacing = '1px';
-  ctx.fillText('ご来場ありがとうございます · Thank You', w / 2, h - 55);
+  ctx.font = '600 24px "Noto Sans JP", sans-serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('ご来場ありがとうございます · Thank You', w / 2, h - 100);
 }
 
 function roundRectPath(ctx, x, y, width, height, radius) {
@@ -836,16 +795,14 @@ async function renderIssuedList(){
     const row = document.createElement('div');
     row.className = 'list-item';
     const roleTag = t.role === 'performer' ? 'PERFORMER' : 'CUSTOMER';
-    const scanCount = t.scanCount || 0;
-    const badgeClass = scanCount > 0 ? 'used' : 'unused';
-    const badgeText = scanCount > 0 ? `Checked in ×${scanCount}` : 'Not scanned';
+    const count = t.scanCount || 0;
     row.innerHTML = `
       <div>
         <div class="li-name">${escapeHtml(t.name)}</div>
         <div class="li-role">${roleTag}</div>
         <div class="li-id">${id}</div>
       </div>
-      <div class="badge ${badgeClass}">${badgeText}</div>
+      <div class="badge ${count > 0 ? 'used' : 'unused'}">${count > 0 ? `Scanned (${count})` : 'Unused'}</div>
     `;
     listEl.appendChild(row);
   }
@@ -933,11 +890,6 @@ function hideOverlay(){
   camStatus.style.color = '';
 }
 
-function formatTime(ts){
-  if(!ts) return '';
-  return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
 async function handleScan(id){
   showOverlay(`<div class="result-card"><div class="result-status" style="color:var(--gold-bright);">Checking…</div></div>`);
 
@@ -947,7 +899,7 @@ async function handleScan(id){
   }catch(err){
     showOverlay(`
       <div class="result-card invalid">
-        <div class="result-status">⚠ NETWORK ERROR</div>
+        <div class="result-status">NETWORK ERROR</div>
         <div class="result-sub">Could not reach database. Check internet connection.</div>
         <button class="primary" onclick="hideOverlay()">Scan Next</button>
       </div>`);
@@ -957,52 +909,59 @@ async function handleScan(id){
   if(!t){
     showOverlay(`
       <div class="result-card invalid">
-        <div class="result-status">✕ INVALID</div>
+        <div class="result-status">INVALID PASS</div>
         <div class="result-sub">Ticket ID not found: ${escapeHtml(id)}</div>
         <button class="primary" onclick="hideOverlay()">Scan Next</button>
       </div>`);
     return;
   }
 
-  // Tickets can be scanned more than once (e.g. guests stepping out and returning).
-  // We never block entry — we just track and surface how many times this pass has been used.
-  const prevScanCount = t.scanCount || 0;
-  const prevLastScanAt = t.lastScanAt || null;
-  const isRepeat = prevScanCount > 0;
+  // Update Multi-Scan Tracking Data
+  const now = Date.now();
+  const currentCount = (t.scanCount || 0) + 1;
+  const history = t.scanHistory || [];
+  history.push(now);
 
-  t.scanCount = prevScanCount + 1;
-  if(!t.firstScanAt) t.firstScanAt = Date.now();
-  t.lastScanAt = Date.now();
+  t.scanCount = currentCount;
+  t.scanHistory = history;
+  t.used = true;
+  t.usedAt = now;
 
   try{
     await setTicket(id, t);
   }catch(err){
     showOverlay(`
       <div class="result-card invalid">
-        <div class="result-status">⚠ NETWORK ERROR</div>
-        <div class="result-sub">Could not save check-in.</div>
+        <div class="result-status">NETWORK ERROR</div>
+        <div class="result-sub">Could not save check-in update.</div>
         <button class="primary" onclick="hideOverlay()">Scan Next</button>
       </div>`);
     return;
   }
 
-  const roleTitle = t.role === 'performer' ? 'PERFORMER' : 'CUSTOMER';
-  const roleChipClass = t.role === 'performer' ? 'performer' : 'customer';
+  const isPerformer = t.role === 'performer';
+  const roleTitle = isPerformer ? 'PERFORMER PASS · 出演者' : 'CUSTOMER PASS · 来客';
+  const cardClass = isPerformer ? 'valid-performer' : 'valid-customer';
 
-  const repeatNote = isRepeat
-    ? `<div class="result-repeat">⟲ Already checked in ${prevScanCount}× before — last at ${formatTime(prevLastScanAt)}</div>`
-    : '';
+  let historyNote = '';
+  if (currentCount > 1) {
+    const lastTime = new Date(history[history.length - 2]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    historyNote = `<div class="result-history">Re-entry pass. Previously scanned at ${lastTime}</div>`;
+  } else {
+    historyNote = `<div class="result-history">First-time entry check-in</div>`;
+  }
 
   showOverlay(`
-    <div class="result-card valid">
-      <div class="corner-badge">Entry #${t.scanCount}</div>
-      <div class="result-status">✓ VALID</div>
-      <div class="role-chip ${roleChipClass}">${roleTitle}</div>
+    <div class="result-card ${cardClass}">
+      <div class="scan-count-badge">SCAN #${currentCount}</div>
+      <div class="result-status">ENTRY GRANTED</div>
+      <div class="result-role-tag">${roleTitle}</div>
       <div class="result-guestname">${escapeHtml(t.name)}</div>
-      <div class="result-sub">${id} · checked in now (${formatTime(t.lastScanAt)})</div>
-      ${repeatNote}
+      <div class="result-sub">ID: ${id}</div>
+      ${historyNote}
       <button class="primary" onclick="hideOverlay()">Scan Next</button>
     </div>`);
+
   renderIssuedList();
 }
 
