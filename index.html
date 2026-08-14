@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LIVE IN KOBE — Ticketing</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <style>
   :root{
     --bg:#0a0908;
@@ -549,6 +549,11 @@ async function startCamera(){
   if(stream) return;
   camStatus.textContent = 'Requesting camera access…';
   camStatus.style.color = '';
+  if(typeof jsQR === 'undefined'){
+    camStatus.textContent = 'QR scanning library failed to load — check your internet connection and reload the page.';
+    camStatus.style.color = 'var(--red)';
+    return;
+  }
   try{
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
     video.srcObject = stream;
