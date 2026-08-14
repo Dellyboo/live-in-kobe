@@ -120,7 +120,7 @@
   .panel h2{
     font-family:var(--serif);
     font-size:20px;
-    margin:0 0 4px;
+    margin:0;
     color:var(--gold-bright);
     font-weight:700;
     display: flex;
@@ -188,7 +188,6 @@
     height: 0;
   }
   
-  /* Updated Horizontal Layout (Icon Left) */
   .role-card {
     display: flex;
     flex-direction: row;
@@ -272,6 +271,33 @@
     gap: 8px;
   }
 
+  /* Collapsible Issued Passes Accordion */
+  .panel-toggle-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .panel-toggle-header i.toggle-icon {
+    font-size: 16px;
+    color: var(--gold);
+    transition: transform 0.25s ease;
+  }
+  .panel-toggle-header.open i.toggle-icon {
+    transform: rotate(180deg);
+  }
+  .issued-count-badge {
+    font-size: 11px;
+    font-family: var(--sans);
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: rgba(226,184,87,0.15);
+    color: var(--gold-bright);
+    margin-left: auto;
+    margin-right: 10px;
+  }
+
   .ticket-result{
     margin-top:18px;
     text-align:center;
@@ -293,10 +319,10 @@
     box-shadow: 0 12px 32px rgba(0,0,0,0.6);
   }
 
-  .list{margin-top:6px;}
+  .list{margin-top:12px;}
   .list-item{
     display:flex;
-    justify-space-between;
+    justify-content:space-between;
     align-items:center;
     padding:10px 0;
     border-bottom:1px solid rgba(255,255,255,0.06);
@@ -347,7 +373,7 @@
     gap: 6px;
   }
 
-  /* COOL SCANNED DISPLAY OVERLAY & ANIMATIONS */
+  /* SCANNED DISPLAY OVERLAY & ANIMATIONS */
   #scan-overlay{
     position:fixed;
     inset:0;
@@ -385,7 +411,6 @@
     100% { transform: scale(1); opacity: 1; }
   }
 
-  /* Animated Scanner Pulse Ring Behind Icon */
   .animated-icon-box {
     position: relative;
     width: 80px;
@@ -593,10 +618,18 @@
       </div>
     </div>
 
+    <!-- ISSUED PASSES COLLAPSIBLE PANEL -->
     <div class="panel">
-      <h2><i class="bi bi-journal-text"></i> Issued Passes</h2>
-      <p class="hint" id="issued-empty">No passes issued yet.</p>
-      <div class="list" id="issued-list"></div>
+      <div class="panel-toggle-header" id="toggle-issued-btn">
+        <h2><i class="bi bi-journal-text"></i> Issued Passes</h2>
+        <span class="issued-count-badge" id="issued-count">0</span>
+        <i class="bi bi-chevron-down toggle-icon"></i>
+      </div>
+      
+      <div id="issued-passes-wrapper" class="hidden" style="margin-top: 14px;">
+        <p class="hint" id="issued-empty">No passes issued yet.</p>
+        <div class="list" id="issued-list"></div>
+      </div>
     </div>
   </div>
 
@@ -604,7 +637,7 @@
   <div id="panel-scan" class="hidden">
     <div class="panel">
       <h2><i class="bi bi-camera-fill"></i> Camera Scan</h2>
-      <p class="hint">Point camera at pass QR code. Multiple entries are allowed for guests re-entering venue.</p>
+      <p class="hint" style="margin-top:4px;">Point camera at pass QR code. Multiple entries are allowed for guests re-entering venue.</p>
       <div id="video-wrap">
         <video id="video" playsinline muted></video>
         <div class="scan-frame"></div>
@@ -683,6 +716,21 @@ tabScan.onclick = () => {
   startCamera();
 };
 
+// ---------- Collapsible Issued Passes Accordion ----------
+const toggleIssuedBtn = document.getElementById('toggle-issued-btn');
+const issuedPassesWrapper = document.getElementById('issued-passes-wrapper');
+
+toggleIssuedBtn.onclick = () => {
+  const isHidden = issuedPassesWrapper.classList.contains('hidden');
+  if (isHidden) {
+    issuedPassesWrapper.classList.remove('hidden');
+    toggleIssuedBtn.classList.add('open');
+  } else {
+    issuedPassesWrapper.classList.add('hidden');
+    toggleIssuedBtn.classList.remove('open');
+  }
+};
+
 // ---------- Pass Generation & Drawing ----------
 const btnGenerate = document.getElementById('btn-generate');
 const ticketResult = document.getElementById('ticket-result');
@@ -747,36 +795,30 @@ async function drawModernPass(id, name, role, qrImg) {
   
   await document.fonts.ready;
 
-  // Canvas Dimensions
   const w = canvas.width;  // 1200
   const h = canvas.height; // 1960
   const isPerformer = role === 'performer';
 
-  // Background Dark Gradient
   ctx.fillStyle = '#0a0a0e';
   ctx.fillRect(0, 0, w, h);
 
-  // Background Radial Glow
   const glow = ctx.createRadialGradient(w/2, isPerformer ? 360 : 240, 20, w/2, isPerformer ? 360 : 240, 640);
   glow.addColorStop(0, isPerformer ? 'rgba(138, 92, 246, 0.22)' : 'rgba(226, 184, 87, 0.18)');
   glow.addColorStop(1, 'transparent');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, w, h);
 
-  // Outer Border Frame
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
   ctx.lineWidth = 4;
   roundRectPath(ctx, 40, 40, w - 80, h - 80, 48);
   ctx.stroke();
 
-  // Header Eyebrow
   ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
   ctx.font = '600 24px "Inter", sans-serif';
   ctx.textAlign = 'center';
   ctx.letterSpacing = '6px';
   ctx.fillText('LIVE IN KOBE 2026', w / 2, 150);
 
-  // Role Pill Badge
   const badgeText = isPerformer ? 'ARTIST ACCESS · 出演者通行証' : 'VIP PASS · 特別招待券';
   const badgeColor = isPerformer ? '#8a5cf6' : '#e2b857';
   
@@ -794,7 +836,6 @@ async function drawModernPass(id, name, role, qrImg) {
   ctx.letterSpacing = '4px';
   ctx.fillText(badgeText, w / 2, 232);
 
-  // Guest Name
   ctx.fillStyle = '#ffffff';
   ctx.font = '700 68px "Playfair Display", serif';
   ctx.letterSpacing = '2px';
@@ -816,7 +857,6 @@ async function drawModernPass(id, name, role, qrImg) {
   ctx.font = '400 23px "Inter", sans-serif';
   ctx.fillText(subNoteEN, w / 2, 480);
 
-  // QR Section Container
   const qrBoxY = 540;
   ctx.fillStyle = '#13131a';
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
@@ -825,7 +865,6 @@ async function drawModernPass(id, name, role, qrImg) {
   ctx.fill();
   ctx.stroke();
 
-  // QR Canvas Render
   const qrSize = 400;
   const qrX = (w - qrSize) / 2;
   const qrY = qrBoxY + 50;
@@ -835,25 +874,21 @@ async function drawModernPass(id, name, role, qrImg) {
   ctx.fill();
   ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
 
-  // Ticket ID Label
   ctx.fillStyle = badgeColor;
   ctx.font = '700 32px "Inter", monospace';
   ctx.letterSpacing = '6px';
   ctx.fillText(id, w / 2, qrBoxY + 575);
 
-  // EN Guidance (Under Ticket Number)
   ctx.fillStyle = '#ffffff';
   ctx.font = '600 22px "Inter", sans-serif';
   ctx.letterSpacing = '1px';
   ctx.fillText('Please present this QR code at the entrance / door', w / 2, qrBoxY + 640);
 
-  // JP Translation Guidance (Bottom of QR Block)
   ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
   ctx.font = '500 21px "Noto Sans JP", sans-serif';
   ctx.letterSpacing = '1px';
   ctx.fillText('入場時にこのQRコードをご提示ください', w / 2, qrBoxY + 685);
 
-  // Date & Venue Section
   const detailsY = 1380;
 
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
@@ -863,7 +898,6 @@ async function drawModernPass(id, name, role, qrImg) {
   ctx.lineTo(w - 120, detailsY);
   ctx.stroke();
 
-  // Date
   ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
   ctx.font = '600 22px "Inter", sans-serif';
   ctx.letterSpacing = '4px';
@@ -874,13 +908,11 @@ async function drawModernPass(id, name, role, qrImg) {
   ctx.letterSpacing = '2px';
   ctx.fillText('13 / 09 / 2026  —  16:00', w / 2, detailsY + 110);
 
-  // Dual-Language Venue Details
   ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
   ctx.font = '600 22px "Inter", sans-serif';
   ctx.letterSpacing = '4px';
   ctx.fillText('VENUE', w / 2, detailsY + 190);
 
-  // ALL CAPS English Venue Address
   ctx.fillStyle = '#ffffff';
   ctx.font = '700 28px "Inter", sans-serif';
   ctx.letterSpacing = '2px';
@@ -890,7 +922,6 @@ async function drawModernPass(id, name, role, qrImg) {
   ctx.font = '400 22px "Inter", sans-serif';
   ctx.fillText('3 Chome-5-5 Kitanagasadori, Chuo Ward, Kobe, Hyogo 650-0012', w / 2, detailsY + 275);
 
-  // ALL CAPS Japanese Venue Address
   ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
   ctx.font = '700 24px "Noto Sans JP", sans-serif';
   ctx.fillText('アルケミー KOBE', w / 2, detailsY + 325);
@@ -899,7 +930,6 @@ async function drawModernPass(id, name, role, qrImg) {
   ctx.font = '400 20px "Noto Sans JP", sans-serif';
   ctx.fillText('〒650-0012 兵庫県神戸市中央区北長狭通3-5-5', w / 2, detailsY + 360);
 
-  // Footer Message
   ctx.fillStyle = badgeColor;
   ctx.font = '600 23px "Noto Sans JP", sans-serif';
   ctx.letterSpacing = '2px';
@@ -935,9 +965,13 @@ async function renderIssuedList(){
   const all = await getAllTickets();
   const listEl = document.getElementById('issued-list');
   const emptyEl = document.getElementById('issued-empty');
+  const countBadge = document.getElementById('issued-count');
   listEl.innerHTML = '';
 
   const entries = Object.entries(all).sort((a, b) => (b[1].issuedAt||0) - (a[1].issuedAt||0));
+
+  // Update total pass count badge
+  countBadge.textContent = entries.length;
 
   if(entries.length === 0){ emptyEl.classList.remove('hidden'); return; }
   emptyEl.classList.add('hidden');
@@ -949,7 +983,6 @@ async function renderIssuedList(){
     const roleTag = isPerf ? 'PERFORMER' : 'CUSTOMER';
     const count = t.scanCount || 0;
     
-    // Clean layout without bi-bi icons
     row.innerHTML = `
       <div>
         <div class="li-name">${escapeHtml(t.name)}</div>
@@ -1083,7 +1116,6 @@ async function handleScan(id){
     return;
   }
 
-  // Multi-Scan Updates
   const now = Date.now();
   const currentCount = (t.scanCount || 0) + 1;
   const history = t.scanHistory || [];
