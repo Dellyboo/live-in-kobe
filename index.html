@@ -8,21 +8,22 @@
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <style>
   :root{
-    --bg:#0a0908;
-    --bg-panel:#131110;
-    --bg-panel-2:#1a1714;
-    --gold:#d4af5a;
-    --gold-bright:#f0d38a;
-    --gold-dim:#8a723f;
-    --ink:#f2ede1;
-    --ink-dim:#a89f8f;
+    --bg:#070709;
+    --bg-panel:#111116;
+    --bg-panel-2:#181820;
+    --gold:#e2b857;
+    --gold-bright:#fce396;
+    --gold-dim:#8e7232;
+    --purple:#8a5cf6;
+    --ink:#f4f4f6;
+    --ink-dim:#9a9a9f;
     --green:#4caf6d;
     --red:#d6534a;
     --amber:#e0a530;
-    --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --serif: 'Playfair Display', Georgia, serif;
     --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;900&family=Inter:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap');
 
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:transparent;}
@@ -35,7 +36,7 @@
     max-width:520px;
     margin:0 auto;
     background:
-      radial-gradient(ellipse at 50% -10%, rgba(212,175,90,0.10), transparent 55%),
+      radial-gradient(ellipse at 50% 0%, rgba(226,184,87,0.12), transparent 60%),
       var(--bg);
     min-height:100vh;
     padding:28px 20px 60px;
@@ -56,7 +57,7 @@
     font-size:38px;
     line-height:1.05;
     margin:0 0 4px;
-    background:linear-gradient(180deg,var(--gold-bright),var(--gold) 55%, var(--gold-dim));
+    background:linear-gradient(180deg,#fff,var(--gold));
     -webkit-background-clip:text;
     background-clip:text;
     -webkit-text-fill-color:transparent;
@@ -75,8 +76,8 @@
     display:flex;
     gap:2px;
     background:var(--bg-panel);
-    border:1px solid rgba(212,175,90,0.25);
-    border-radius:10px;
+    border:1px solid rgba(226,184,87,0.25);
+    border-radius:12px;
     padding:4px;
     margin-bottom:24px;
   }
@@ -90,26 +91,27 @@
     color:var(--ink-dim);
     background:transparent;
     border:none;
-    border-radius:7px;
+    border-radius:9px;
     cursor:pointer;
     transition:all .15s ease;
     font-family:var(--sans);
   }
   .tab.active{
     background:linear-gradient(180deg,var(--gold-bright),var(--gold));
-    color:#161310;
+    color:#0f0e0c;
   }
 
   .panel{
     background:var(--bg-panel);
-    border:1px solid rgba(212,175,90,0.18);
-    border-radius:16px;
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:20px;
     padding:22px;
     margin-bottom:16px;
+    backdrop-filter: blur(10px);
   }
   .panel h2{
     font-family:var(--serif);
-    font-size:19px;
+    font-size:20px;
     margin:0 0 4px;
     color:var(--gold-bright);
     font-weight:700;
@@ -132,35 +134,80 @@
   input[type=text]{
     width:100%;
     background:var(--bg-panel-2);
-    border:1px solid rgba(212,175,90,0.25);
+    border:1px solid rgba(255,255,255,0.12);
     color:var(--ink);
     padding:12px 14px;
-    border-radius:9px;
+    border-radius:10px;
     font-size:15px;
     font-family:var(--sans);
-    margin-bottom:14px;
+    margin-bottom:16px;
   }
   input[type=text]:focus{outline:none;border-color:var(--gold);}
 
+  /* Role Selection Radio Cards */
+  .role-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .role-option {
+    flex: 1;
+    position: relative;
+  }
+  .role-option input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .role-card {
+    display: block;
+    text-align: center;
+    padding: 12px;
+    background: var(--bg-panel-2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .role-card .role-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--ink);
+  }
+  .role-card .role-sub {
+    font-size: 10px;
+    color: var(--ink-dim);
+    margin-top: 2px;
+  }
+  .role-option input:checked + .role-card {
+    border-color: var(--gold);
+    background: rgba(226,184,87,0.08);
+  }
+  .role-option input:checked + .role-card .role-title {
+    color: var(--gold-bright);
+  }
+
   button.primary{
     width:100%;
-    padding:13px;
+    padding:14px;
     border:none;
-    border-radius:9px;
+    border-radius:10px;
     background:linear-gradient(180deg,var(--gold-bright),var(--gold));
-    color:#161310;
+    color:#0f0e0c;
     font-weight:700;
     font-size:14px;
     letter-spacing:0.03em;
     cursor:pointer;
     font-family:var(--sans);
+    box-shadow: 0 4px 15px rgba(226,184,87,0.2);
   }
   button.primary:active{transform:translateY(1px);}
   button.secondary{
     width:100%;
     padding:12px;
-    border:1px solid rgba(212,175,90,0.35);
-    border-radius:9px;
+    border:1px solid rgba(226,184,87,0.35);
+    border-radius:10px;
     background:transparent;
     color:var(--gold-bright);
     font-weight:600;
@@ -175,22 +222,20 @@
     text-align:center;
     padding:16px;
     background:var(--bg-panel-2);
-    border-radius:12px;
-    border:1px solid rgba(212,175,90,0.2);
+    border-radius:14px;
+    border:1px solid rgba(226,184,87,0.2);
   }
   
-  /* Ticket Canvas */
   #ticket-canvas-container {
     width: 100%;
-    margin: 0 auto;
     display: flex;
     justify-content: center;
   }
   #ticket-canvas {
     max-width: 100%;
     height: auto;
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.6);
   }
 
   .list{margin-top:6px;}
@@ -199,11 +244,12 @@
     justify-content:space-between;
     align-items:center;
     padding:10px 0;
-    border-bottom:1px solid rgba(212,175,90,0.1);
+    border-bottom:1px solid rgba(255,255,255,0.06);
     font-size:13.5px;
   }
   .list-item:last-child{border-bottom:none;}
-  .list-item .li-name{color:var(--ink);}
+  .list-item .li-name{color:var(--ink); font-weight: 500;}
+  .list-item .li-role{font-size: 10px; color: var(--gold); text-transform: uppercase; margin-top:2px;}
   .list-item .li-id{color:var(--ink-dim);font-size:11px;font-family:monospace;}
   .badge{
     font-size:10.5px;
@@ -224,7 +270,7 @@
     background:#000;
     border-radius:14px;
     overflow:hidden;
-    border:1px solid rgba(212,175,90,0.25);
+    border:1px solid rgba(226,184,87,0.25);
     margin-bottom:14px;
   }
   #video{width:100%;height:100%;object-fit:cover;display:block;}
@@ -233,7 +279,7 @@
     inset:14%;
     border:2px solid var(--gold-bright);
     border-radius:12px;
-    box-shadow:0 0 0 999px rgba(0,0,0,0.35);
+    box-shadow:0 0 0 999px rgba(0,0,0,0.4);
   }
   .cam-status{
     text-align:center;
@@ -271,12 +317,11 @@
   .result-card.used .result-status{color:var(--amber);}
   .result-card.invalid .result-status{color:var(--red);}
 
-  /* Full-screen scan result overlay */
   #scan-overlay{
     position:fixed;
     inset:0;
     background:rgba(6,5,4,0.88);
-    backdrop-filter:blur(4px);
+    backdrop-filter:blur(6px);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -333,33 +378,52 @@
   <div class="subtitle">Ticketing &amp; Door Check-in</div>
 
   <div class="tabs">
-    <button class="tab active" id="tab-issue">Issue Ticket</button>
+    <button class="tab active" id="tab-issue">Issue Pass</button>
     <button class="tab" id="tab-scan">Scan at Door</button>
   </div>
 
   <!-- ISSUE PANEL -->
   <div id="panel-issue">
     <div class="panel">
-      <h2>New ticket</h2>
-      <p class="hint">Enter the guest's name to generate their digital ticket pass. Send them the downloaded image to show at the door.</p>
-      <label for="guest-name">Guest name</label>
-      <input type="text" id="guest-name" placeholder="e.g. Aya Tanaka" />
-      <button class="primary" id="btn-generate">Generate Ticket Pass</button>
+      <h2>New Pass</h2>
+      <p class="hint">Select the pass type and enter the name to generate a modern digital pass.</p>
+      
+      <label>Pass Type</label>
+      <div class="role-selector">
+        <label class="role-option">
+          <input type="radio" name="pass-role" value="customer" checked>
+          <div class="role-card">
+            <div class="role-title">Customer</div>
+            <div class="role-sub">GUEST PASS</div>
+          </div>
+        </label>
+        <label class="role-option">
+          <input type="radio" name="pass-role" value="performer">
+          <div class="role-card">
+            <div class="role-title">Performer</div>
+            <div class="role-sub">ARTIST ACCESS</div>
+          </div>
+        </label>
+      </div>
 
-      <!-- Temporary hidden QR div for library rendering -->
+      <label for="guest-name">Name</label>
+      <input type="text" id="guest-name" placeholder="e.g. Aya Tanaka" />
+      <button class="primary" id="btn-generate">Generate Digital Pass</button>
+
+      <!-- Temporary hidden QR canvas -->
       <div id="temp-qrcode" class="hidden"></div>
 
       <div class="ticket-result hidden" id="ticket-result">
         <div id="ticket-canvas-container">
-          <canvas id="ticket-canvas" width="600" height="1050"></canvas>
+          <canvas id="ticket-canvas" width="600" height="980"></canvas>
         </div>
-        <button class="secondary" id="btn-download">Download Digital Ticket</button>
+        <button class="secondary" id="btn-download">Download Pass Image</button>
       </div>
     </div>
 
     <div class="panel">
-      <h2>Issued tickets</h2>
-      <p class="hint" id="issued-empty">No tickets issued yet.</p>
+      <h2>Issued Passes</h2>
+      <p class="hint" id="issued-empty">No passes issued yet.</p>
       <div class="list" id="issued-list"></div>
     </div>
   </div>
@@ -367,8 +431,8 @@
   <!-- SCAN PANEL -->
   <div id="panel-scan" class="hidden">
     <div class="panel">
-      <h2>Camera scan</h2>
-      <p class="hint">Point the camera at the guest's QR code. If camera access isn't available, enter the ticket ID manually below.</p>
+      <h2>Camera Scan</h2>
+      <p class="hint">Point the camera at the pass QR code or input the ticket ID manually.</p>
       <div id="video-wrap">
         <video id="video" playsinline muted></video>
         <div class="scan-frame"></div>
@@ -376,11 +440,10 @@
       <div class="cam-status" id="cam-status">Starting camera…</div>
       <canvas id="canvas" class="hidden"></canvas>
 
-      <label for="manual-id">Manual ticket ID</label>
+      <label for="manual-id">Manual Ticket ID</label>
       <input type="text" id="manual-id" placeholder="e.g. LIK-4F8B2C" style="text-transform:uppercase;" />
-      <button class="primary" id="btn-check">Check Ticket</button>
+      <button class="primary" id="btn-check">Verify Ticket</button>
     </div>
-
   </div>
 
   <div id="scan-overlay">
@@ -391,7 +454,6 @@
 </div>
 
 <script>
-// ---------- storage helpers (Firebase Realtime Database REST API) ----------
 const FIREBASE_URL = 'https://live-in-kobe-default-rtdb.firebaseio.com';
 
 async function getTicket(id){
@@ -429,7 +491,7 @@ function genId(){
   return 'LIK-' + s;
 }
 
-// ---------- tabs ----------
+// ---------- Tabs ----------
 const tabIssue = document.getElementById('tab-issue');
 const tabScan = document.getElementById('tab-scan');
 const panelIssue = document.getElementById('panel-issue');
@@ -446,7 +508,7 @@ tabScan.onclick = () => {
   startCamera();
 };
 
-// ---------- issue ticket & canvas generator ----------
+// ---------- Pass Generation & Drawing ----------
 const btnGenerate = document.getElementById('btn-generate');
 const ticketResult = document.getElementById('ticket-result');
 const guestNameInput = document.getElementById('guest-name');
@@ -455,39 +517,37 @@ let currentTicketId = '';
 btnGenerate.onclick = async () => {
   const name = guestNameInput.value.trim();
   if(!name){ guestNameInput.focus(); return; }
+  
+  const role = document.querySelector('input[name="pass-role"]:checked').value;
   btnGenerate.disabled = true;
-  btnGenerate.textContent = 'Generating Pass…';
+  btnGenerate.textContent = 'Creating Pass…';
 
   try{
     const id = genId();
     currentTicketId = id;
 
     if(typeof QRCode === 'undefined'){
-      throw new Error('QR library failed to load (check network/CDN access).');
+      throw new Error('QR library failed to load.');
     }
 
-    // Save ticket data
-    await setTicket(id, { name, used:false, usedAt:null, issuedAt: Date.now() });
+    await setTicket(id, { name, role, used:false, usedAt:null, issuedAt: Date.now() });
 
-    // 1. Generate QR temporarily to capture image
+    // Temp QR render
     const tempDiv = document.getElementById('temp-qrcode');
     tempDiv.innerHTML = '';
-    const qrcode = new QRCode(tempDiv, {
+    new QRCode(tempDiv, {
       text: id,
-      width: 260,
-      height: 260,
-      colorDark: '#12100d',
+      width: 220,
+      height: 220,
+      colorDark: '#0d0d11',
       colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.H
     });
 
-    // Wait briefly for library image generation
     await new Promise(r => setTimeout(r, 150));
-
     const qrImg = tempDiv.querySelector('img') || tempDiv.querySelector('canvas');
     
-    // 2. Render Full Digital Pass on Canvas
-    await drawDigitalPass(id, name, qrImg);
+    await drawModernPass(id, name, role, qrImg);
 
     ticketResult.classList.remove('hidden');
     guestNameInput.value = '';
@@ -497,146 +557,171 @@ btnGenerate.onclick = async () => {
     alert('Could not generate ticket: ' + (err && err.message ? err.message : err));
   }finally{
     btnGenerate.disabled = false;
-    btnGenerate.textContent = 'Generate Ticket Pass';
+    btnGenerate.textContent = 'Generate Digital Pass';
   }
 };
 
-async function drawDigitalPass(id, guestName, qrImageElement) {
+async function drawModernPass(id, name, role, qrImg) {
   const canvas = document.getElementById('ticket-canvas');
   const ctx = canvas.getContext('2d');
   
-  // Ensure custom web fonts are loaded prior to canvas rendering
   await document.fonts.ready;
 
   const w = canvas.width;  // 600
-  const h = canvas.height; // 1050
+  const h = canvas.height; // 980
+  const isPerformer = role === 'performer';
 
-  // Background
-  ctx.fillStyle = '#0f0e0c';
+  // 1. Dark Modern Background
+  ctx.fillStyle = '#0a0a0e';
   ctx.fillRect(0, 0, w, h);
 
-  // Subtle Outer Border
-  ctx.strokeStyle = '#3a3122';
-  ctx.lineWidth = 4;
-  ctx.strokeRect(16, 16, w - 32, h - 32);
+  // Subtle Mesh Gradient Glow
+  const glow = ctx.createRadialGradient(w/2, isPerformer ? 180 : 120, 10, w/2, isPerformer ? 180 : 120, 320);
+  glow.addColorStop(0, isPerformer ? 'rgba(138, 92, 246, 0.22)' : 'rgba(226, 184, 87, 0.18)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
 
-  // Decorative Inner Gold Frame
-  ctx.strokeStyle = '#d4af5a';
+  // Card Outer Edge Contour
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
   ctx.lineWidth = 2;
-  ctx.strokeRect(30, 30, w - 60, h - 60);
+  roundRectPath(ctx, 20, 20, w - 40, h - 40, 24);
+  ctx.stroke();
 
-  // Corner Accents
-  const cs = 18;
-  const corners = [
-    [30, 30], [w - 30, 30],
-    [30, h - 30], [w - 30, h - 30]
-  ];
-  ctx.fillStyle = '#f0d38a';
-  corners.forEach(([cx, cy]) => {
-    ctx.fillRect(cx - 4, cy - 4, 8, 8);
-  });
-
-  // Top Subheader
-  ctx.fillStyle = '#8a723f';
-  ctx.font = '600 13px "Inter", sans-serif';
+  // 2. Header Info
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+  ctx.font = '600 12px "Inter", sans-serif';
   ctx.textAlign = 'center';
-  ctx.letterSpacing = '4px';
-  ctx.fillText('PREMIUM LIVE SHOWCASE 2026', w / 2, 85);
+  ctx.letterSpacing = '3px';
+  ctx.fillText('LIVE IN KOBE 2026', w / 2, 75);
 
-  // Title
-  ctx.fillStyle = '#f0d38a';
-  ctx.font = '900 42px "Playfair Display", serif';
+  // Role Pill Badge
+  const badgeText = isPerformer ? 'ARTIST ACCESS · 出演者通行証' : 'VIP PASS · 特別招待券';
+  const badgeColor = isPerformer ? '#8a5cf6' : '#e2b857';
+  
+  ctx.fillStyle = isPerformer ? 'rgba(138, 92, 246, 0.15)' : 'rgba(226, 184, 87, 0.15)';
+  ctx.strokeStyle = badgeColor;
+  ctx.lineWidth = 1.5;
+  
+  const bw = 320, bh = 34;
+  roundRectPath(ctx, (w - bw) / 2, 95, bw, bh, 17);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = isPerformer ? '#c4b5fd' : '#fce396';
+  ctx.font = '700 12px "Noto Sans JP", "Inter", sans-serif';
   ctx.letterSpacing = '2px';
-  ctx.fillText('LIVE IN KOBE', w / 2, 140);
+  ctx.fillText(badgeText, w / 2, 116);
 
-  // Divider Line 1
-  drawDivider(ctx, 175, w);
+  // 3. Guest Name & Appreciation Note
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '700 34px "Playfair Display", serif';
+  ctx.letterSpacing = '1px';
+  ctx.fillText(name, w / 2, 185);
 
-  // Ticket ID Badge
-  ctx.fillStyle = '#a89f8f';
-  ctx.font = '600 13px "Inter", sans-serif';
-  ctx.letterSpacing = '2px';
-  ctx.fillText('TICKET ID: ' + id, w / 2, 215);
+  // Respectful Japanese & English Note
+  const subNoteJP = isPerformer 
+    ? '素晴らしいパフォーマンスを心より楽しみにしております' 
+    : 'ご来場を心よりお待ちしております';
+  const subNoteEN = isPerformer 
+    ? 'Thank you for sharing your talent with us.' 
+    : 'Thank you for joining us. We look forward to seeing you!';
 
-  // Draw QR Code Container
-  const qrSize = 250;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+  ctx.font = '500 13px "Noto Sans JP", sans-serif';
+  ctx.letterSpacing = '0px';
+  ctx.fillText(subNoteJP, w / 2, 220);
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+  ctx.font = '400 11.5px "Inter", sans-serif';
+  ctx.fillText(subNoteEN, w / 2, 240);
+
+  // 4. Center QR Section Container
+  const qrBoxY = 275;
+  ctx.fillStyle = '#13131a';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+  ctx.lineWidth = 1;
+  roundRectPath(ctx, 70, qrBoxY, w - 140, 360, 20);
+  ctx.fill();
+  ctx.stroke();
+
+  // QR Code Image
+  const qrSize = 210;
   const qrX = (w - qrSize) / 2;
-  const qrY = 245;
+  const qrY = qrBoxY + 30;
 
   ctx.fillStyle = '#ffffff';
-  ctx.roundRect ? ctx.roundRect(qrX - 12, qrY - 12, qrSize + 24, qrSize + 24, 12) : ctx.fillRect(qrX - 12, qrY - 12, qrSize + 24, qrSize + 24);
+  roundRectPath(ctx, qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 12);
   ctx.fill();
+  ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
 
-  // Draw QR Code Image
-  ctx.drawImage(qrImageElement, qrX, qrY, qrSize, qrSize);
-
-  // Guest Label
-  ctx.fillStyle = '#8a723f';
-  ctx.font = '600 12px "Inter", sans-serif';
+  // Ticket Code Display
+  ctx.fillStyle = badgeColor;
+  ctx.font = '700 15px "Inter", monospace';
   ctx.letterSpacing = '3px';
-  ctx.fillText('GUEST NAME', w / 2, 550);
+  ctx.fillText(id, w / 2, qrBoxY + 300);
 
-  // Guest Name Value
-  ctx.fillStyle = '#f2ede1';
-  ctx.font = '700 32px "Playfair Display", serif';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.font = '500 10.5px "Noto Sans JP", sans-serif';
   ctx.letterSpacing = '1px';
-  ctx.fillText(guestName.toUpperCase(), w / 2, 595);
+  ctx.fillText('入場時にこのQRコードをご提示ください', w / 2, qrBoxY + 325);
 
-  // Divider Line 2
-  drawDivider(ctx, 635, w);
+  // 5. Event Details Footer
+  const detailsY = 675;
 
-  // Instructions
-  ctx.fillStyle = '#d4af5a';
-  ctx.font = '600 13px "Inter", sans-serif';
-  ctx.letterSpacing = '2px';
-  ctx.fillText('PRESENT THIS QR CODE AT THE DOOR', w / 2, 680);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.beginPath();
+  ctx.moveTo(60, detailsY);
+  ctx.lineTo(w - 60, detailsY);
+  ctx.stroke();
 
-  // Event Date & Time
-  ctx.fillStyle = '#f2ede1';
-  ctx.font = '700 24px "Inter", sans-serif';
-  ctx.letterSpacing = '2px';
-  ctx.fillText('13 / 09 / 2026  ·  TIME 16:00', w / 2, 725);
-
-  // Divider Line 3
-  drawDivider(ctx, 770, w);
-
-  // Venue / Footer Details
-  ctx.fillStyle = '#a89f8f';
-  ctx.font = '500 14px "Inter", sans-serif';
-  ctx.letterSpacing = '2px';
-  ctx.fillText('ALCHEMY KOBE', w / 2, 820);
-
-  ctx.fillStyle = '#8a723f';
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
   ctx.font = '600 11px "Inter", sans-serif';
-  ctx.letterSpacing = '3px';
-  ctx.fillText('SUN SEPT 13, 2026 — DOORS OPEN 15:30', w / 2, 850);
-
-  // Pass Type Pill Box
-  ctx.strokeStyle = '#8a723f';
-  ctx.lineWidth = 1;
-  const bw = 160, bh = 28;
-  const bx = (w - bw) / 2, by = 900;
-  ctx.strokeRect(bx, by, bw, bh);
-
-  ctx.fillStyle = '#f0d38a';
-  ctx.font = '700 11px "Inter", sans-serif';
   ctx.letterSpacing = '2px';
-  ctx.fillText('VIP ENTRY PASS', w / 2, by + 18);
+  ctx.fillText('DATE & TIME', w / 2, detailsY + 35);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '700 22px "Inter", sans-serif';
+  ctx.letterSpacing = '1px';
+  ctx.fillText('13 / 09 / 2026  —  16:00', w / 2, detailsY + 68);
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.font = '600 11px "Inter", sans-serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('VENUE', w / 2, detailsY + 115);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '600 16px "Noto Sans JP", sans-serif';
+  ctx.fillText('Alchemy Kobe (アルケミー神戸)', w / 2, detailsY + 142);
+
+  // Express Thank You Note at Bottom
+  ctx.fillStyle = badgeColor;
+  ctx.font = '600 12px "Noto Sans JP", sans-serif';
+  ctx.letterSpacing = '1px';
+  ctx.fillText('ご来場ありがとうございます · Thank You', w / 2, h - 55);
 }
 
-function drawDivider(ctx, y, width) {
-  ctx.strokeStyle = 'rgba(212, 175, 90, 0.3)';
-  ctx.lineWidth = 1;
+function roundRectPath(ctx, x, y, width, height, radius) {
   ctx.beginPath();
-  ctx.moveTo(60, y);
-  ctx.lineTo(width - 60, y);
-  ctx.stroke();
+  if (ctx.roundRect) {
+    ctx.roundRect(x, y, width, height, radius);
+  } else {
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+  }
 }
 
 document.getElementById('btn-download').onclick = () => {
   const canvas = document.getElementById('ticket-canvas');
   const link = document.createElement('a');
-  link.download = `Ticket-${currentTicketId}.png`;
+  link.download = `Pass-${currentTicketId}.png`;
   link.href = canvas.toDataURL('image/png');
   link.click();
 };
@@ -655,9 +740,11 @@ async function renderIssuedList(){
   for(const [id, t] of entries.slice(0, 50)){
     const row = document.createElement('div');
     row.className = 'list-item';
+    const roleTag = t.role === 'performer' ? 'PERFORMER' : 'CUSTOMER';
     row.innerHTML = `
       <div>
         <div class="li-name">${escapeHtml(t.name)}</div>
+        <div class="li-role">${roleTag}</div>
         <div class="li-id">${id}</div>
       </div>
       <div class="badge ${t.used ? 'used' : 'unused'}">${t.used ? 'Used' : 'Valid'}</div>
@@ -665,11 +752,12 @@ async function renderIssuedList(){
     listEl.appendChild(row);
   }
 }
+
 function escapeHtml(s){
   return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-// ---------- scan ----------
+// ---------- Scan Controls ----------
 let stream = null;
 let scanLoopId = null;
 const video = document.getElementById('video');
@@ -683,7 +771,7 @@ async function startCamera(){
   camStatus.textContent = 'Requesting camera access…';
   camStatus.style.color = '';
   if(typeof jsQR === 'undefined'){
-    camStatus.textContent = 'QR scanning library failed to load — check your internet connection and reload the page.';
+    camStatus.textContent = 'QR scanning library failed to load.';
     camStatus.style.color = 'var(--red)';
     return;
   }
@@ -695,14 +783,16 @@ async function startCamera(){
     scanLoop();
   }catch(e){
     console.error('Camera start failed:', e);
-    camStatus.textContent = 'Camera error: ' + (e && e.message ? e.message : e) + ' — use manual entry below.';
+    camStatus.textContent = 'Camera error: ' + (e && e.message ? e.message : e) + ' — use manual entry.';
     camStatus.style.color = 'var(--red)';
   }
 }
+
 function stopCamera(){
   if(scanLoopId) cancelAnimationFrame(scanLoopId);
   if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
 }
+
 function scanLoop(){
   scanLoopId = requestAnimationFrame(scanLoop);
   try{
@@ -735,6 +825,7 @@ function showOverlay(html){
   document.getElementById('scan-overlay-inner').innerHTML = html;
   overlay.classList.add('show');
 }
+
 function hideOverlay(){
   document.getElementById('scan-overlay').classList.remove('show');
   document.getElementById('manual-id').value = '';
@@ -754,7 +845,7 @@ async function handleScan(id){
     showOverlay(`
       <div class="result-card invalid">
         <div class="result-status">⚠ NETWORK ERROR</div>
-        <div class="result-sub">Could not reach the ticket database. Check your internet connection and try again.</div>
+        <div class="result-sub">Could not reach database. Check internet connection.</div>
         <button class="primary" onclick="hideOverlay()">Scan Next</button>
       </div>`);
     return;
@@ -789,15 +880,17 @@ async function handleScan(id){
     showOverlay(`
       <div class="result-card invalid">
         <div class="result-status">⚠ NETWORK ERROR</div>
-        <div class="result-sub">Could not save check-in. Check your connection and scan again.</div>
+        <div class="result-sub">Could not save check-in.</div>
         <button class="primary" onclick="hideOverlay()">Scan Next</button>
       </div>`);
     return;
   }
 
+  const roleTitle = t.role === 'performer' ? 'PERFORMER PASS' : 'GUEST PASS';
+
   showOverlay(`
     <div class="result-card valid">
-      <div class="result-status">✓ VALID</div>
+      <div class="result-status">✓ VALID (${roleTitle})</div>
       <div class="result-guestname">${escapeHtml(t.name)}</div>
       <div class="result-sub">${id} · checked in now</div>
       <button class="primary" onclick="hideOverlay()">Scan Next</button>
@@ -805,7 +898,7 @@ async function handleScan(id){
   renderIssuedList();
 }
 
-// init
+// Init
 renderIssuedList();
 </script>
 </body>
