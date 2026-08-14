@@ -11,16 +11,16 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
   :root{
-    --bg:#070709;
-    --bg-panel:#111116;
-    --bg-panel-2:#181820;
+    --bg:#03060d;
+    --bg-panel:#0b1326;
+    --bg-panel-2:#111c38;
     --gold:#e2b857;
     --gold-bright:#fce396;
     --gold-dim:#8e7232;
     --purple:#8a5cf6;
     --purple-bright:#c4b5fd;
     --ink:#f4f4f6;
-    --ink-dim:#9a9a9f;
+    --ink-dim:#8a9ab8;
     --green:#4caf6d;
     --green-bright:#6ee7b7;
     --red:#d6534a;
@@ -30,7 +30,7 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap');
 
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:transparent;}
+  html,body{margin:0;padding:0;background:#03060d;}
   body{
     font-family:var(--sans);
     color:var(--ink);
@@ -40,7 +40,8 @@
     max-width:520px;
     margin:0 auto;
     background:
-      radial-gradient(ellipse at 50% 0%, rgba(226,184,87,0.12), transparent 60%),
+      radial-gradient(ellipse at 50% 0%, rgba(22, 42, 86, 0.6), transparent 70%),
+      radial-gradient(ellipse at 80% 80%, rgba(226, 184, 87, 0.08), transparent 50%),
       var(--bg);
     min-height:100vh;
     padding:28px 20px 60px;
@@ -106,7 +107,7 @@
   }
   .tab.active{
     background:linear-gradient(180deg,var(--gold-bright),var(--gold));
-    color:#0f0e0c;
+    color:#0a0e1a;
   }
 
   .panel{
@@ -225,7 +226,7 @@
   }
   .role-option input:checked + .role-card {
     border-color: var(--gold);
-    background: rgba(226,184,87,0.08);
+    background: rgba(226,184,87,0.12);
   }
   .role-option input:checked + .role-card i {
     color: var(--gold-bright);
@@ -240,7 +241,7 @@
     border:none;
     border-radius:10px;
     background:linear-gradient(180deg,var(--gold-bright),var(--gold));
-    color:#0f0e0c;
+    color:#0a0e1a;
     font-weight:700;
     font-size:14px;
     letter-spacing:0.03em;
@@ -316,7 +317,8 @@
     max-width: 100%;
     height: auto;
     border-radius: 12px;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.8);
+    background: #03060d;
   }
 
   .list{margin-top:12px;}
@@ -360,7 +362,7 @@
     inset:14%;
     border:2px solid var(--gold-bright);
     border-radius:12px;
-    box-shadow:0 0 0 999px rgba(0,0,0,0.4);
+    box-shadow:0 0 0 999px rgba(3,6,13,0.5);
   }
   .cam-status{
     text-align:center;
@@ -377,7 +379,7 @@
   #scan-overlay{
     position:fixed;
     inset:0;
-    background:rgba(4, 4, 6, 0.85);
+    background:rgba(3, 6, 13, 0.88);
     backdrop-filter:blur(12px);
     display:flex;
     align-items:center;
@@ -402,7 +404,7 @@
     width:100%;
     border:1px solid;
     animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.9);
     overflow: hidden;
   }
 
@@ -458,7 +460,7 @@
 
   /* Customer Style Glow */
   .result-card.valid-customer{
-    background: linear-gradient(180deg, rgba(76,175,109,0.22), rgba(17,17,22,0.96));
+    background: linear-gradient(180deg, rgba(76,175,109,0.22), rgba(11,19,38,0.96));
     border-color: rgba(110,231,183,0.5);
   }
   .result-card.valid-customer .animated-icon-box {
@@ -471,7 +473,7 @@
 
   /* Performer Style Glow */
   .result-card.valid-performer{
-    background: linear-gradient(180deg, rgba(138,92,246,0.25), rgba(17,17,22,0.96));
+    background: linear-gradient(180deg, rgba(138,92,246,0.25), rgba(11,19,38,0.96));
     border-color: rgba(196,181,253,0.5);
   }
   .result-card.valid-performer .animated-icon-box {
@@ -484,7 +486,7 @@
 
   /* Invalid Ticket Style */
   .result-card.invalid{
-    background: linear-gradient(180deg, rgba(214,83,74,0.25), rgba(17,17,22,0.96));
+    background: linear-gradient(180deg, rgba(214,83,74,0.25), rgba(11,19,38,0.96));
     border-color: rgba(214,83,74,0.5);
   }
   .result-card.invalid .animated-icon-box {
@@ -767,7 +769,7 @@ btnGenerate.onclick = async () => {
       text: id,
       width: 440,
       height: 440,
-      colorDark: '#0d0d11',
+      colorDark: '#0b1326',
       colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.H
     });
@@ -799,16 +801,16 @@ async function drawModernPass(id, name, role, qrImg) {
   const h = canvas.height; // 1960
   const isPerformer = role === 'performer';
 
-  ctx.fillStyle = '#0a0a0e';
+  ctx.fillStyle = '#060c1a';
   ctx.fillRect(0, 0, w, h);
 
   const glow = ctx.createRadialGradient(w/2, isPerformer ? 360 : 240, 20, w/2, isPerformer ? 360 : 240, 640);
-  glow.addColorStop(0, isPerformer ? 'rgba(138, 92, 246, 0.22)' : 'rgba(226, 184, 87, 0.18)');
+  glow.addColorStop(0, isPerformer ? 'rgba(138, 92, 246, 0.28)' : 'rgba(226, 184, 87, 0.22)');
   glow.addColorStop(1, 'transparent');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, w, h);
 
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
   ctx.lineWidth = 4;
   roundRectPath(ctx, 40, 40, w - 80, h - 80, 48);
   ctx.stroke();
@@ -858,8 +860,8 @@ async function drawModernPass(id, name, role, qrImg) {
   ctx.fillText(subNoteEN, w / 2, 480);
 
   const qrBoxY = 540;
-  ctx.fillStyle = '#13131a';
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+  ctx.fillStyle = '#101a30';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
   ctx.lineWidth = 2;
   roundRectPath(ctx, 120, qrBoxY, w - 240, 770, 40);
   ctx.fill();
