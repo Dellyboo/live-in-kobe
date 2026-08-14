@@ -1,659 +1,607 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIVE IN KOBE — Ticketing</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
-    <style>
-        :root {
-            --bg: #0a0908;
-            --bg-panel: #131110;
-            --bg-panel-2: #1a1714;
-            --gold: #d4af5a;
-            --gold-bright: #f0d38a;
-            --gold-dim: #8a723f;
-            --ink: #f2ede1;
-            --ink-dim: #a89f8f;
-            --green: #4caf6d;
-            --red: #d6534a;
-            --amber: #e0a530;
-            --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
-            --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIVE IN KOBE — Ticketing</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.js"></script>
+<style>
+  :root{
+    --bg:#0a0908;
+    --bg-panel:#131110;
+    --bg-panel-2:#1a1714;
+    --gold:#d4af5a;
+    --gold-bright:#f0d38a;
+    --gold-dim:#8a723f;
+    --ink:#f2ede1;
+    --ink-dim:#a89f8f;
+    --green:#4caf6d;
+    --red:#d6534a;
+    --amber:#e0a530;
+    --serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;900&family=Inter:wght@400;500;600;700;800&display=swap');
 
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;900&family=Inter:wght@400;500;600;700;800&display=swap');
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:transparent;}
+  body{
+    font-family:var(--sans);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  .app{
+    max-width:520px;
+    margin:0 auto;
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(212,175,90,0.10), transparent 55%),
+      var(--bg);
+    min-height:100vh;
+    padding:28px 20px 60px;
+  }
 
-        * {
-            box-sizing: border-box;
-        }
+  .eyebrow{
+    text-align:center;
+    font-size:11px;
+    letter-spacing:0.32em;
+    text-transform:uppercase;
+    color:var(--gold-dim);
+    margin-bottom:6px;
+  }
+  h1.title{
+    font-family:var(--serif);
+    font-weight:900;
+    text-align:center;
+    font-size:38px;
+    line-height:1.05;
+    margin:0 0 4px;
+    background:linear-gradient(180deg,var(--gold-bright),var(--gold) 55%, var(--gold-dim));
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    letter-spacing:0.01em;
+  }
+  .subtitle{
+    text-align:center;
+    font-size:12px;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    margin-bottom:26px;
+  }
 
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            background: transparent;
-        }
+  .tabs{
+    display:flex;
+    gap:2px;
+    background:var(--bg-panel);
+    border:1px solid rgba(212,175,90,0.25);
+    border-radius:10px;
+    padding:4px;
+    margin-bottom:24px;
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:11px 8px;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    color:var(--ink-dim);
+    background:transparent;
+    border:none;
+    border-radius:7px;
+    cursor:pointer;
+    transition:all .15s ease;
+    font-family:var(--sans);
+  }
+  .tab.active{
+    background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+    color:#161310;
+  }
 
-        body {
-            font-family: var(--sans);
-            color: var(--ink);
-            min-height: 100vh;
-        }
+  .panel{
+    background:var(--bg-panel);
+    border:1px solid rgba(212,175,90,0.18);
+    border-radius:16px;
+    padding:22px;
+    margin-bottom:16px;
+  }
+  .panel h2{
+    font-family:var(--serif);
+    font-size:19px;
+    margin:0 0 4px;
+    color:var(--gold-bright);
+    font-weight:700;
+  }
+  .panel .hint{
+    font-size:12.5px;
+    color:var(--ink-dim);
+    margin:0 0 18px;
+    line-height:1.5;
+  }
 
-        .app {
-            max-width: 520px;
-            margin: 0 auto;
-            background:
-                radial-gradient(ellipse at 50% -10%, rgba(212, 175, 90, 0.10), transparent 55%),
-                var(--bg);
-            min-height: 100vh;
-            padding: 28px 20px 60px;
-        }
+  label{
+    display:block;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    margin-bottom:6px;
+  }
+  input[type=text]{
+    width:100%;
+    background:var(--bg-panel-2);
+    border:1px solid rgba(212,175,90,0.25);
+    color:var(--ink);
+    padding:12px 14px;
+    border-radius:9px;
+    font-size:15px;
+    font-family:var(--sans);
+    margin-bottom:14px;
+  }
+  input[type=text]:focus{outline:none;border-color:var(--gold);}
 
-        .eyebrow {
-            text-align: center;
-            font-size: 11px;
-            letter-spacing: 0.32em;
-            text-transform: uppercase;
-            color: var(--gold-dim);
-            margin-bottom: 6px;
-        }
+  button.primary{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:9px;
+    background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+    color:#161310;
+    font-weight:700;
+    font-size:14px;
+    letter-spacing:0.03em;
+    cursor:pointer;
+    font-family:var(--sans);
+  }
+  button.primary:active{transform:translateY(1px);}
+  button.secondary{
+    width:100%;
+    padding:12px;
+    border:1px solid rgba(212,175,90,0.35);
+    border-radius:9px;
+    background:transparent;
+    color:var(--gold-bright);
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    font-family:var(--sans);
+    margin-top:8px;
+  }
 
-        h1.title {
-            font-family: var(--serif);
-            font-weight: 900;
-            text-align: center;
-            font-size: 38px;
-            line-height: 1.05;
-            margin: 0 0 4px;
-            background: linear-gradient(180deg, var(--gold-bright), var(--gold) 55%, var(--gold-dim));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 0.01em;
-        }
+  .ticket-result{
+    margin-top:18px;
+    text-align:center;
+    padding:20px;
+    background:var(--bg-panel-2);
+    border-radius:12px;
+    border:1px solid rgba(212,175,90,0.2);
+  }
+  .ticket-result .qr-box{
+    display:inline-block;
+    background:#fff;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:12px;
+  }
+  .ticket-result .id{
+    font-family:'Inter', monospace;
+    font-size:13px;
+    letter-spacing:0.08em;
+    color:var(--gold-bright);
+    margin-bottom:2px;
+  }
+  .ticket-result .name{
+    font-family:var(--serif);
+    font-size:18px;
+    color:var(--ink);
+  }
 
-        .subtitle {
-            text-align: center;
-            font-size: 12px;
-            letter-spacing: 0.22em;
-            text-transform: uppercase;
-            color: var(--ink-dim);
-            margin-bottom: 26px;
-        }
+  .list{margin-top:6px;}
+  .list-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid rgba(212,175,90,0.1);
+    font-size:13.5px;
+  }
+  .list-item:last-child{border-bottom:none;}
+  .list-item .li-name{color:var(--ink);}
+  .list-item .li-id{color:var(--ink-dim);font-size:11px;font-family:monospace;}
+  .badge{
+    font-size:10.5px;
+    padding:3px 9px;
+    border-radius:20px;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+  }
+  .badge.unused{background:rgba(76,175,109,0.15);color:var(--green);}
+  .badge.used{background:rgba(224,165,48,0.15);color:var(--amber);}
 
-        .tabs {
-            display: flex;
-            gap: 2px;
-            background: var(--bg-panel);
-            border: 1px solid rgba(212, 175, 90, 0.25);
-            border-radius: 10px;
-            padding: 4px;
-            margin-bottom: 24px;
-        }
+  /* Scanner */
+  #video-wrap{
+    position:relative;
+    width:100%;
+    aspect-ratio:1/1;
+    background:#000;
+    border-radius:14px;
+    overflow:hidden;
+    border:1px solid rgba(212,175,90,0.25);
+    margin-bottom:14px;
+  }
+  #video{width:100%;height:100%;object-fit:cover;display:block;}
+  .scan-frame{
+    position:absolute;
+    inset:14%;
+    border:2px solid var(--gold-bright);
+    border-radius:12px;
+    box-shadow:0 0 0 999px rgba(0,0,0,0.35);
+  }
+  .cam-status{
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-dim);
+    margin-bottom:14px;
+  }
 
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 11px 8px;
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.04em;
-            color: var(--ink-dim);
-            background: transparent;
-            border: none;
-            border-radius: 7px;
-            cursor: pointer;
-            transition: all .15s ease;
-            font-family: var(--sans);
-        }
+  .result-card{
+    border-radius:16px;
+    padding:26px 20px;
+    text-align:center;
+    margin-bottom:16px;
+    border:1px solid;
+  }
+  .result-card.valid{
+    background:rgba(76,175,109,0.12);
+    border-color:var(--green);
+  }
+  .result-card.used{
+    background:rgba(224,165,48,0.12);
+    border-color:var(--amber);
+  }
+  .result-card.invalid{
+    background:rgba(214,83,74,0.12);
+    border-color:var(--red);
+  }
+  .result-status{
+    font-family:var(--serif);
+    font-weight:800;
+    font-size:26px;
+    margin-bottom:6px;
+  }
+  .result-card.valid .result-status{color:var(--green);}
+  .result-card.used .result-status{color:var(--amber);}
+  .result-card.invalid .result-status{color:var(--red);}
+  .result-guestname{
+    font-family:var(--serif);
+    font-size:22px;
+    color:var(--ink);
+    margin-bottom:4px;
+  }
+  .result-sub{
+    font-size:12px;
+    color:var(--ink-dim);
+  }
 
-        .tab.active {
-            background: linear-gradient(180deg, var(--gold-bright), var(--gold));
-            color: #161310;
-        }
-
-        .panel {
-            background: var(--bg-panel);
-            border: 1px solid rgba(212, 175, 90, 0.18);
-            border-radius: 16px;
-            padding: 22px;
-            margin-bottom: 16px;
-        }
-
-        .panel h2 {
-            font-family: var(--serif);
-            font-size: 19px;
-            margin: 0 0 4px;
-            color: var(--gold-bright);
-            font-weight: 700;
-        }
-
-        .panel .hint {
-            font-size: 12.5px;
-            color: var(--ink-dim);
-            margin: 0 0 18px;
-            line-height: 1.5;
-        }
-
-        label {
-            display: block;
-            font-size: 11px;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--ink-dim);
-            margin-bottom: 6px;
-        }
-
-        input[type=text] {
-            width: 100%;
-            background: var(--bg-panel-2);
-            border: 1px solid rgba(212, 175, 90, 0.25);
-            color: var(--ink);
-            padding: 12px 14px;
-            border-radius: 9px;
-            font-size: 15px;
-            font-family: var(--sans);
-            margin-bottom: 14px;
-        }
-
-        input[type=text]:focus {
-            outline: none;
-            border-color: var(--gold);
-        }
-
-        button.primary {
-            width: 100%;
-            padding: 13px;
-            border: none;
-            border-radius: 9px;
-            background: linear-gradient(180deg, var(--gold-bright), var(--gold));
-            color: #161310;
-            font-weight: 700;
-            font-size: 14px;
-            letter-spacing: 0.03em;
-            cursor: pointer;
-            font-family: var(--sans);
-        }
-
-        button.primary:active {
-            transform: translateY(1px);
-        }
-
-        button.secondary {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid rgba(212, 175, 90, 0.35);
-            border-radius: 9px;
-            background: transparent;
-            color: var(--gold-bright);
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            font-family: var(--sans);
-            margin-top: 8px;
-        }
-
-        .ticket-result {
-            margin-top: 18px;
-            text-align: center;
-            padding: 20px;
-            background: var(--bg-panel-2);
-            border-radius: 12px;
-            border: 1px solid rgba(212, 175, 90, 0.2);
-        }
-
-        .ticket-result .qr-box {
-            display: inline-block;
-            background: #fff;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-        }
-
-        .ticket-result .id {
-            font-family: 'Inter', monospace;
-            font-size: 13px;
-            letter-spacing: 0.08em;
-            color: var(--gold-bright);
-            margin-bottom: 2px;
-        }
-
-        .ticket-result .name {
-            font-family: var(--serif);
-            font-size: 18px;
-            color: var(--ink);
-        }
-
-        .list {
-            margin-top: 6px;
-        }
-
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(212, 175, 90, 0.1);
-            font-size: 13.5px;
-        }
-
-        .list-item:last-child {
-            border-bottom: none;
-        }
-
-        .list-item .li-name {
-            color: var(--ink);
-        }
-
-        .list-item .li-id {
-            color: var(--ink-dim);
-            font-size: 11px;
-            font-family: monospace;
-        }
-
-        .badge {
-            font-size: 10.5px;
-            padding: 3px 9px;
-            border-radius: 20px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-
-        .badge.unused {
-            background: rgba(76, 175, 109, 0.15);
-            color: var(--green);
-        }
-
-        .badge.used {
-            background: rgba(224, 165, 48, 0.15);
-            color: var(--amber);
-        }
-
-        /* Scanner */
-        #video-wrap {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 1/1;
-            background: #000;
-            border-radius: 14px;
-            overflow: hidden;
-            border: 1px solid rgba(212, 175, 90, 0.25);
-            margin-bottom: 14px;
-        }
-
-        #video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        .scan-frame {
-            position: absolute;
-            inset: 14%;
-            border: 2px solid var(--gold-bright);
-            border-radius: 12px;
-            box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.35);
-        }
-
-        .cam-status {
-            text-align: center;
-            font-size: 12px;
-            color: var(--ink-dim);
-            margin-bottom: 14px;
-        }
-
-        .result-card {
-            border-radius: 16px;
-            padding: 26px 20px;
-            text-align: center;
-            margin-bottom: 16px;
-            border: 1px solid;
-        }
-
-        .result-card.valid {
-            background: rgba(76, 175, 109, 0.12);
-            border-color: var(--green);
-        }
-
-        .result-card.used {
-            background: rgba(224, 165, 48, 0.12);
-            border-color: var(--amber);
-        }
-
-        .result-card.invalid {
-            background: rgba(214, 83, 74, 0.12);
-            border-color: var(--red);
-        }
-
-        .result-status {
-            font-family: var(--serif);
-            font-weight: 800;
-            font-size: 26px;
-            margin-bottom: 6px;
-        }
-
-        .result-card.valid .result-status {
-            color: var(--green);
-        }
-
-        .result-card.used .result-status {
-            color: var(--amber);
-        }
-
-        .result-card.invalid .result-status {
-            color: var(--red);
-        }
-
-        .result-guestname {
-            font-family: var(--serif);
-            font-size: 22px;
-            color: var(--ink);
-            margin-bottom: 4px;
-        }
-
-        .result-sub {
-            font-size: 12px;
-            color: var(--ink-dim);
-        }
-
-        .footer-note {
-            text-align: center;
-            font-size: 11px;
-            color: var(--gold-dim);
-            letter-spacing: 0.08em;
-            margin-top: 26px;
-            text-transform: uppercase;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-    </style>
+  .footer-note{
+    text-align:center;
+    font-size:11px;
+    color:var(--gold-dim);
+    letter-spacing:0.08em;
+    margin-top:26px;
+    text-transform:uppercase;
+  }
+  .hidden{display:none !important;}
+</style>
 </head>
-
 <body>
-    <div class="app">
-        <div class="eyebrow">Premium Live Showcase 2026</div>
-        <h1 class="title">LIVE IN KOBE</h1>
-        <div class="subtitle">Ticketing &amp; Door Check-in</div>
+<div class="app">
+  <div class="eyebrow">Premium Live Showcase 2026</div>
+  <h1 class="title">LIVE IN KOBE</h1>
+  <div class="subtitle">Ticketing &amp; Door Check-in</div>
 
-        <div class="tabs">
-            <button class="tab active" id="tab-issue">Issue Ticket</button>
-            <button class="tab" id="tab-scan">Scan at Door</button>
-        </div>
+  <div class="tabs">
+    <button class="tab active" id="tab-issue">Issue Ticket</button>
+    <button class="tab" id="tab-scan">Scan at Door</button>
+  </div>
 
-        <!-- ISSUE PANEL -->
-        <div id="panel-issue">
-            <div class="panel">
-                <h2>New ticket</h2>
-                <p class="hint">Enter the guest's name to generate their ticket QR code. Send them the image — they show
-                    it at the door.</p>
-                <label for="guest-name">Guest name</label>
-                <input type="text" id="guest-name" placeholder="e.g. Aya Tanaka" />
-                <button class="primary" id="btn-generate">Generate Ticket</button>
+  <!-- ISSUE PANEL -->
+  <div id="panel-issue">
+    <div class="panel">
+      <h2>New ticket</h2>
+      <p class="hint">Enter the guest's name to generate their ticket QR code. Send them the image — they show it at the door.</p>
+      <label for="guest-name">Guest name</label>
+      <input type="text" id="guest-name" placeholder="e.g. Aya Tanaka" />
+      <button class="primary" id="btn-generate">Generate Ticket</button>
 
-                <div class="ticket-result hidden" id="ticket-result">
-                    <div class="qr-box">
-                        <div id="qrcode"></div>
-                    </div>
-                    <div class="id" id="ticket-id-display"></div>
-                    <div class="name" id="ticket-name-display"></div>
-                    <button class="secondary" id="btn-download">Download QR Image</button>
-                </div>
-            </div>
-
-            <div class="panel">
-                <h2>Issued tickets</h2>
-                <p class="hint" id="issued-empty">No tickets issued yet.</p>
-                <div class="list" id="issued-list"></div>
-            </div>
-        </div>
-
-        <!-- SCAN PANEL -->
-        <div id="panel-scan" class="hidden">
-            <div class="panel">
-                <h2>Camera scan</h2>
-                <p class="hint">Point the camera at the guest's QR code. If camera access isn't available, enter the
-                    ticket ID manually below.</p>
-                <div id="video-wrap">
-                    <video id="video" playsinline muted></video>
-                    <div class="scan-frame"></div>
-                </div>
-                <div class="cam-status" id="cam-status">Starting camera…</div>
-                <canvas id="canvas" class="hidden"></canvas>
-
-                <label for="manual-id">Manual ticket ID</label>
-                <input type="text" id="manual-id" placeholder="e.g. LIK-4F8B2C" style="text-transform:uppercase;" />
-                <button class="primary" id="btn-check">Check Ticket</button>
-            </div>
-
-            <div id="scan-result"></div>
-        </div>
-
-        <div class="footer-note">Alchemy Kobe · Sun Sept 13, 2026</div>
+      <div class="ticket-result hidden" id="ticket-result">
+        <div class="qr-box"><div id="qrcode"></div></div>
+        <div class="id" id="ticket-id-display"></div>
+        <div class="name" id="ticket-name-display"></div>
+        <button class="secondary" id="btn-download">Download QR Image</button>
+      </div>
     </div>
 
-    <script>
-        // ---------- storage helpers ----------
-        async function getTicket(id) {
-            try {
-                const r = await window.storage.get('ticket:' + id, true);
-                return r ? JSON.parse(r.value) : null;
-            } catch (e) { return null; }
-        }
-        async function setTicket(id, data) {
-            await window.storage.set('ticket:' + id, JSON.stringify(data), true);
-        }
-        async function getIndex() {
-            try {
-                const r = await window.storage.get('ticket-index', true);
-                return r ? JSON.parse(r.value) : [];
-            } catch (e) { return []; }
-        }
-        async function addToIndex(id) {
-            const idx = await getIndex();
-            idx.unshift(id);
-            await window.storage.set('ticket-index', JSON.stringify(idx), true);
-        }
+    <div class="panel">
+      <h2>Issued tickets</h2>
+      <p class="hint" id="issued-empty">No tickets issued yet.</p>
+      <div class="list" id="issued-list"></div>
+    </div>
+  </div>
 
-        function genId() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let s = '';
-            for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
-            return 'LIK-' + s;
-        }
+  <!-- SCAN PANEL -->
+  <div id="panel-scan" class="hidden">
+    <div class="panel">
+      <h2>Camera scan</h2>
+      <p class="hint">Point the camera at the guest's QR code. If camera access isn't available, enter the ticket ID manually below.</p>
+      <div id="video-wrap">
+        <video id="video" playsinline muted></video>
+        <div class="scan-frame"></div>
+      </div>
+      <div class="cam-status" id="cam-status">Starting camera…</div>
+      <canvas id="canvas" class="hidden"></canvas>
 
-        // ---------- tabs ----------
-        const tabIssue = document.getElementById('tab-issue');
-        const tabScan = document.getElementById('tab-scan');
-        const panelIssue = document.getElementById('panel-issue');
-        const panelScan = document.getElementById('panel-scan');
+      <label for="manual-id">Manual ticket ID</label>
+      <input type="text" id="manual-id" placeholder="e.g. LIK-4F8B2C" style="text-transform:uppercase;" />
+      <button class="primary" id="btn-check">Check Ticket</button>
+    </div>
 
-        tabIssue.onclick = () => {
-            tabIssue.classList.add('active'); tabScan.classList.remove('active');
-            panelIssue.classList.remove('hidden'); panelScan.classList.add('hidden');
-            stopCamera();
-        };
-        tabScan.onclick = () => {
-            tabScan.classList.add('active'); tabIssue.classList.remove('active');
-            panelScan.classList.remove('hidden'); panelIssue.classList.add('hidden');
-            startCamera();
-        };
+    <div id="scan-result"></div>
+  </div>
 
-        // ---------- issue ticket ----------
-        const btnGenerate = document.getElementById('btn-generate');
-        const ticketResult = document.getElementById('ticket-result');
-        const guestNameInput = document.getElementById('guest-name');
-        let currentQR = null;
+  <div class="footer-note">Alchemy Kobe · Sun Sept 13, 2026</div>
+</div>
 
-        btnGenerate.onclick = async () => {
-            const name = guestNameInput.value.trim();
-            if (!name) { guestNameInput.focus(); return; }
-            btnGenerate.disabled = true;
-            btnGenerate.textContent = 'Generating…';
+<script>
+// ---------- storage helpers (Firebase Realtime Database REST API) ----------
+const FIREBASE_URL = 'https://live-in-kobe-default-rtdb.firebaseio.com';
 
-            try {
-                const id = genId();
+async function getTicket(id){
+  try{
+    const res = await fetch(`${FIREBASE_URL}/tickets/${id}.json`);
+    if(!res.ok) throw new Error('Firebase request failed: ' + res.status);
+    const data = await res.json();
+    return data || null;
+  }catch(e){
+    console.error('getTicket failed:', e);
+    return null;
+  }
+}
+async function setTicket(id, data){
+  const res = await fetch(`${FIREBASE_URL}/tickets/${id}.json`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  if(!res.ok) throw new Error('Could not save ticket (Firebase status ' + res.status + ')');
+}
+async function getAllTickets(){
+  try{
+    const res = await fetch(`${FIREBASE_URL}/tickets.json`);
+    if(!res.ok) throw new Error('Firebase request failed: ' + res.status);
+    const data = await res.json();
+    return data || {};
+  }catch(e){
+    console.error('getAllTickets failed:', e);
+    return {};
+  }
+}
 
-                if (typeof QRCode === 'undefined') {
-                    throw new Error('QR library failed to load (check network/CDN access).');
-                }
+function genId(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s = '';
+  for(let i=0;i<6;i++) s += chars[Math.floor(Math.random()*chars.length)];
+  return 'LIK-' + s;
+}
 
-                await setTicket(id, { name, used: false, usedAt: null, issuedAt: Date.now() });
-                await addToIndex(id);
+// ---------- tabs ----------
+const tabIssue = document.getElementById('tab-issue');
+const tabScan = document.getElementById('tab-scan');
+const panelIssue = document.getElementById('panel-issue');
+const panelScan = document.getElementById('panel-scan');
 
-                document.getElementById('qrcode').innerHTML = '';
-                currentQR = new QRCode(document.getElementById('qrcode'), {
-                    text: id,
-                    width: 200,
-                    height: 200,
-                    colorDark: '#161310',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.H
-                });
+tabIssue.onclick = () => {
+  tabIssue.classList.add('active'); tabScan.classList.remove('active');
+  panelIssue.classList.remove('hidden'); panelScan.classList.add('hidden');
+  stopCamera();
+};
+tabScan.onclick = () => {
+  tabScan.classList.add('active'); tabIssue.classList.remove('active');
+  panelScan.classList.remove('hidden'); panelIssue.classList.add('hidden');
+  startCamera();
+};
 
-                document.getElementById('ticket-id-display').textContent = id;
-                document.getElementById('ticket-name-display').textContent = name;
-                ticketResult.classList.remove('hidden');
+// ---------- issue ticket ----------
+const btnGenerate = document.getElementById('btn-generate');
+const ticketResult = document.getElementById('ticket-result');
+const guestNameInput = document.getElementById('guest-name');
+let currentQR = null;
 
-                guestNameInput.value = '';
-                await renderIssuedList();
-            } catch (err) {
-                console.error('Ticket generation failed:', err);
-                alert('Could not generate ticket: ' + (err && err.message ? err.message : err));
-            } finally {
-                btnGenerate.disabled = false;
-                btnGenerate.textContent = 'Generate Ticket';
-            }
-        };
+btnGenerate.onclick = async () => {
+  const name = guestNameInput.value.trim();
+  if(!name){ guestNameInput.focus(); return; }
+  btnGenerate.disabled = true;
+  btnGenerate.textContent = 'Generating…';
 
-        document.getElementById('btn-download').onclick = () => {
-            setTimeout(() => {
-                const img = document.querySelector('#qrcode img') || document.querySelector('#qrcode canvas');
-                if (!img) return;
-                const link = document.createElement('a');
-                link.download = document.getElementById('ticket-id-display').textContent + '.png';
-                link.href = img.tagName === 'CANVAS' ? img.toDataURL() : img.src;
-                link.click();
-            }, 100);
-        };
+  try{
+    const id = genId();
 
-        async function renderIssuedList() {
-            const idx = await getIndex();
-            const listEl = document.getElementById('issued-list');
-            const emptyEl = document.getElementById('issued-empty');
-            listEl.innerHTML = '';
-            if (idx.length === 0) { emptyEl.classList.remove('hidden'); return; }
-            emptyEl.classList.add('hidden');
+    if(typeof QRCode === 'undefined'){
+      throw new Error('QR library failed to load (check network/CDN access).');
+    }
 
-            for (const id of idx.slice(0, 50)) {
-                const t = await getTicket(id);
-                if (!t) continue;
-                const row = document.createElement('div');
-                row.className = 'list-item';
-                row.innerHTML = `
+    await setTicket(id, { name, used:false, usedAt:null, issuedAt: Date.now() });
+
+    document.getElementById('qrcode').innerHTML = '';
+    currentQR = new QRCode(document.getElementById('qrcode'), {
+      text: id,
+      width: 200,
+      height: 200,
+      colorDark: '#161310',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    document.getElementById('ticket-id-display').textContent = id;
+    document.getElementById('ticket-name-display').textContent = name;
+    ticketResult.classList.remove('hidden');
+
+    guestNameInput.value = '';
+    await renderIssuedList();
+  }catch(err){
+    console.error('Ticket generation failed:', err);
+    alert('Could not generate ticket: ' + (err && err.message ? err.message : err));
+  }finally{
+    btnGenerate.disabled = false;
+    btnGenerate.textContent = 'Generate Ticket';
+  }
+};
+
+document.getElementById('btn-download').onclick = () => {
+  setTimeout(() => {
+    const img = document.querySelector('#qrcode img') || document.querySelector('#qrcode canvas');
+    if(!img) return;
+    const link = document.createElement('a');
+    link.download = document.getElementById('ticket-id-display').textContent + '.png';
+    link.href = img.tagName === 'CANVAS' ? img.toDataURL() : img.src;
+    link.click();
+  }, 100);
+};
+
+async function renderIssuedList(){
+  const all = await getAllTickets();
+  const listEl = document.getElementById('issued-list');
+  const emptyEl = document.getElementById('issued-empty');
+  listEl.innerHTML = '';
+
+  const entries = Object.entries(all).sort((a, b) => (b[1].issuedAt||0) - (a[1].issuedAt||0));
+
+  if(entries.length === 0){ emptyEl.classList.remove('hidden'); return; }
+  emptyEl.classList.add('hidden');
+
+  for(const [id, t] of entries.slice(0, 50)){
+    const row = document.createElement('div');
+    row.className = 'list-item';
+    row.innerHTML = `
       <div>
         <div class="li-name">${escapeHtml(t.name)}</div>
         <div class="li-id">${id}</div>
       </div>
       <div class="badge ${t.used ? 'used' : 'unused'}">${t.used ? 'Used' : 'Valid'}</div>
     `;
-                listEl.appendChild(row);
-            }
-        }
-        function escapeHtml(s) {
-            return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-        }
+    listEl.appendChild(row);
+  }
+}
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 
-        // ---------- scan ----------
-        let stream = null;
-        let scanLoopId = null;
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        const camStatus = document.getElementById('cam-status');
-        let scanLocked = false;
+// ---------- scan ----------
+let stream = null;
+let scanLoopId = null;
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d', { willReadFrequently: true });
+const camStatus = document.getElementById('cam-status');
+let scanLocked = false;
 
-        async function startCamera() {
-            if (stream) return;
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                video.srcObject = stream;
-                await video.play();
-                camStatus.textContent = 'Scanning…';
-                scanLoop();
-            } catch (e) {
-                camStatus.textContent = 'Camera unavailable — use manual entry below.';
-            }
-        }
-        function stopCamera() {
-            if (scanLoopId) cancelAnimationFrame(scanLoopId);
-            if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-        }
-        function scanLoop() {
-            scanLoopId = requestAnimationFrame(scanLoop);
-            if (video.readyState !== video.HAVE_ENOUGH_DATA || scanLocked) return;
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = jsQR(imgData.data, imgData.width, imgData.height);
-            if (code && code.data) {
-                scanLocked = true;
-                handleScan(code.data.trim().toUpperCase());
-                setTimeout(() => { scanLocked = false; }, 2500);
-            }
-        }
+async function startCamera(){
+  if(stream) return;
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    video.srcObject = stream;
+    await video.play();
+    camStatus.textContent = 'Scanning…';
+    scanLoop();
+  }catch(e){
+    camStatus.textContent = 'Camera unavailable — use manual entry below.';
+  }
+}
+function stopCamera(){
+  if(scanLoopId) cancelAnimationFrame(scanLoopId);
+  if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
+}
+function scanLoop(){
+  scanLoopId = requestAnimationFrame(scanLoop);
+  if(video.readyState !== video.HAVE_ENOUGH_DATA || scanLocked) return;
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(imgData.data, imgData.width, imgData.height);
+  if(code && code.data){
+    scanLocked = true;
+    handleScan(code.data.trim().toUpperCase());
+    setTimeout(() => { scanLocked = false; }, 2500);
+  }
+}
 
-        document.getElementById('btn-check').onclick = () => {
-            const val = document.getElementById('manual-id').value.trim().toUpperCase();
-            if (val) handleScan(val);
-        };
+document.getElementById('btn-check').onclick = () => {
+  const val = document.getElementById('manual-id').value.trim().toUpperCase();
+  if(val) handleScan(val);
+};
 
-        async function handleScan(id) {
-            const t = await getTicket(id);
-            const resultEl = document.getElementById('scan-result');
+async function handleScan(id){
+  const resultEl = document.getElementById('scan-result');
+  resultEl.innerHTML = `<p class="hint" style="text-align:center;">Checking…</p>`;
 
-            if (!t) {
-                resultEl.innerHTML = `
+  let t;
+  try{
+    t = await getTicket(id);
+  }catch(err){
+    resultEl.innerHTML = `
+      <div class="result-card invalid">
+        <div class="result-status">⚠ NETWORK ERROR</div>
+        <div class="result-sub">Could not reach the ticket database. Check your internet connection and try again.</div>
+      </div>`;
+    return;
+  }
+
+  if(!t){
+    resultEl.innerHTML = `
       <div class="result-card invalid">
         <div class="result-status">✕ INVALID</div>
         <div class="result-sub">Ticket ID not found: ${escapeHtml(id)}</div>
       </div>`;
-                return;
-            }
+    return;
+  }
 
-            if (t.used) {
-                resultEl.innerHTML = `
+  if(t.used){
+    resultEl.innerHTML = `
       <div class="result-card used">
         <div class="result-status">⚠ ALREADY USED</div>
         <div class="result-guestname">${escapeHtml(t.name)}</div>
         <div class="result-sub">Checked in at ${new Date(t.usedAt).toLocaleTimeString()}</div>
       </div>`;
-                return;
-            }
+    return;
+  }
 
-            t.used = true;
-            t.usedAt = Date.now();
-            await setTicket(id, t);
+  t.used = true;
+  t.usedAt = Date.now();
+  try{
+    await setTicket(id, t);
+  }catch(err){
+    resultEl.innerHTML = `
+      <div class="result-card invalid">
+        <div class="result-status">⚠ NETWORK ERROR</div>
+        <div class="result-sub">Could not save check-in. Check your connection and scan again.</div>
+      </div>`;
+    return;
+  }
 
-            resultEl.innerHTML = `
+  resultEl.innerHTML = `
     <div class="result-card valid">
       <div class="result-status">✓ VALID</div>
       <div class="result-guestname">${escapeHtml(t.name)}</div>
       <div class="result-sub">${id} · checked in now</div>
     </div>`;
-        }
+}
 
-        // init
-        renderIssuedList();
-    </script>
+// init
+renderIssuedList();
+</script>
 </body>
-
 </html>
