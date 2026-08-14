@@ -275,6 +275,40 @@
   .result-card.valid .result-status{color:var(--green);}
   .result-card.used .result-status{color:var(--amber);}
   .result-card.invalid .result-status{color:var(--red);}
+
+  /* Full-screen scan result overlay */
+  #scan-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(6,5,4,0.88);
+    backdrop-filter:blur(4px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+    padding:24px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .15s ease;
+  }
+  #scan-overlay.show{
+    opacity:1;
+    pointer-events:all;
+  }
+  #scan-overlay .result-card{
+    max-width:380px;
+    width:100%;
+    animation:pop .18s ease;
+  }
+  @keyframes pop{
+    from{ transform:scale(0.92); opacity:0; }
+    to{ transform:scale(1); opacity:1; }
+  }
+  #scan-overlay .result-status{ font-size:30px; }
+  #scan-overlay .result-guestname{ font-size:25px; }
+  #scan-overlay button.primary{
+    margin-top:18px;
+  }
   .result-guestname{
     font-family:var(--serif);
     font-size:22px;
@@ -349,7 +383,10 @@
       <button class="primary" id="btn-check">Check Ticket</button>
     </div>
 
-    <div id="scan-result"></div>
+  </div>
+
+  <div id="scan-overlay">
+    <div id="scan-overlay-inner"></div>
   </div>
 
   <div class="footer-note">Alchemy Kobe · Sun Sept 13, 2026</div>
@@ -510,6 +547,8 @@ let scanLocked = false;
 
 async function startCamera(){
   if(stream) return;
+  camStatus.textContent = 'Requesting camera access…';
+  camStatus.style.color = '';
   try{
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
     video.srcObject = stream;
@@ -517,7 +556,9 @@ async function startCamera(){
     camStatus.textContent = 'Scanning…';
     scanLoop();
   }catch(e){
-    camStatus.textContent = 'Camera unavailable — use manual entry below.';
+    console.error('Camera start failed:', e);
+    camStatus.textContent = 'Camera error: ' + (e && e.message ? e.message : e) + ' — use manual entry below.';
+    camStatus.style.color = 'var(--red)';
   }
 }
 function stopCamera(){
@@ -526,16 +567,23 @@ function stopCamera(){
 }
 function scanLoop(){
   scanLoopId = requestAnimationFrame(scanLoop);
-  if(video.readyState !== video.HAVE_ENOUGH_DATA || scanLocked) return;
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const code = jsQR(imgData.data, imgData.width, imgData.height);
-  if(code && code.data){
-    scanLocked = true;
-    handleScan(code.data.trim().toUpperCase());
-    setTimeout(() => { scanLocked = false; }, 2500);
+  try{
+    if(video.readyState !== video.HAVE_ENOUGH_DATA || scanLocked) return;
+    if(!video.videoWidth || !video.videoHeight) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'attemptBoth' });
+    if(code && code.data){
+      scanLocked = true;
+      camStatus.textContent = 'Detected: ' + code.data;
+      handleScan(code.data.trim().toUpperCase());
+    }
+  }catch(err){
+    console.error('scanLoop error:', err);
+    camStatus.textContent = 'Scan error: ' + (err && err.message ? err.message : err);
+    camStatus.style.color = 'var(--red)';
   }
 }
 
@@ -544,38 +592,54 @@ document.getElementById('btn-check').onclick = () => {
   if(val) handleScan(val);
 };
 
+function showOverlay(html){
+  const overlay = document.getElementById('scan-overlay');
+  document.getElementById('scan-overlay-inner').innerHTML = html;
+  overlay.classList.add('show');
+}
+function hideOverlay(){
+  document.getElementById('scan-overlay').classList.remove('show');
+  document.getElementById('manual-id').value = '';
+  scanLocked = false;
+  const camStatus = document.getElementById('cam-status');
+  camStatus.textContent = 'Scanning…';
+  camStatus.style.color = '';
+}
+
 async function handleScan(id){
-  const resultEl = document.getElementById('scan-result');
-  resultEl.innerHTML = `<p class="hint" style="text-align:center;">Checking…</p>`;
+  showOverlay(`<div class="result-card"><div class="result-status" style="color:var(--gold-bright);">Checking…</div></div>`);
 
   let t;
   try{
     t = await getTicket(id);
   }catch(err){
-    resultEl.innerHTML = `
+    showOverlay(`
       <div class="result-card invalid">
         <div class="result-status">⚠ NETWORK ERROR</div>
         <div class="result-sub">Could not reach the ticket database. Check your internet connection and try again.</div>
-      </div>`;
+        <button class="primary" onclick="hideOverlay()">Scan Next</button>
+      </div>`);
     return;
   }
 
   if(!t){
-    resultEl.innerHTML = `
+    showOverlay(`
       <div class="result-card invalid">
         <div class="result-status">✕ INVALID</div>
         <div class="result-sub">Ticket ID not found: ${escapeHtml(id)}</div>
-      </div>`;
+        <button class="primary" onclick="hideOverlay()">Scan Next</button>
+      </div>`);
     return;
   }
 
   if(t.used){
-    resultEl.innerHTML = `
+    showOverlay(`
       <div class="result-card used">
         <div class="result-status">⚠ ALREADY USED</div>
         <div class="result-guestname">${escapeHtml(t.name)}</div>
         <div class="result-sub">Checked in at ${new Date(t.usedAt).toLocaleTimeString()}</div>
-      </div>`;
+        <button class="primary" onclick="hideOverlay()">Scan Next</button>
+      </div>`);
     return;
   }
 
@@ -584,20 +648,23 @@ async function handleScan(id){
   try{
     await setTicket(id, t);
   }catch(err){
-    resultEl.innerHTML = `
+    showOverlay(`
       <div class="result-card invalid">
         <div class="result-status">⚠ NETWORK ERROR</div>
         <div class="result-sub">Could not save check-in. Check your connection and scan again.</div>
-      </div>`;
+        <button class="primary" onclick="hideOverlay()">Scan Next</button>
+      </div>`);
     return;
   }
 
-  resultEl.innerHTML = `
+  showOverlay(`
     <div class="result-card valid">
       <div class="result-status">✓ VALID</div>
       <div class="result-guestname">${escapeHtml(t.name)}</div>
       <div class="result-sub">${id} · checked in now</div>
-    </div>`;
+      <button class="primary" onclick="hideOverlay()">Scan Next</button>
+    </div>`);
+  renderIssuedList();
 }
 
 // init
