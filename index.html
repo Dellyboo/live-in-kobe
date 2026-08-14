@@ -293,7 +293,7 @@
     font-size:13.5px;
   }
   .list-item:last-child{border-bottom:none;}
-  .list-item .li-name{color:var(--ink); font-weight: 500; display: flex; align-items: center; gap: 6px;}
+  .list-item .li-name{color:var(--ink); font-weight: 500;}
   .list-item .li-role{font-size: 10px; color: var(--gold); text-transform: uppercase; margin-top:2px;}
   .list-item .li-id{color:var(--ink-dim);font-size:11px;font-family:monospace;}
   .badge{
@@ -303,9 +303,6 @@
     font-weight:700;
     letter-spacing:0.04em;
     text-transform:uppercase;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
   }
   .badge.unused{background:rgba(255,255,255,0.08);color:var(--ink-dim);}
   .badge.used{background:rgba(76,175,109,0.15);color:var(--green-bright);}
@@ -542,7 +539,7 @@
   <div id="panel-issue">
     <div class="panel">
       <h2><i class="bi bi-plus-circle-fill"></i> New Pass</h2>
-      <p class="hint">Select pass type and enter full name to generate high-resolution digital ticket pass.</p>
+      <p class="hint">Select pass type and enter full name to generate digital ticket pass.</p>
       
       <label>Pass Type</label>
       <div class="role-selector">
@@ -614,7 +611,7 @@
     <div id="scan-overlay-inner"></div>
   </div>
 
-  <div class="footer-note"><i class="bi bi-geo-alt-fill"></i> Alchemy Kobe · Sun Sept 13, 2026</div>
+  <div class="footer-note"><i class="bi bi-geo-alt-fill"></i> ALCHEMY KOBE · Sun Sept 13, 2026</div>
 </div>
 
 <script>
@@ -869,20 +866,20 @@ async function drawModernPass(id, name, role, qrImg) {
   ctx.letterSpacing = '4px';
   ctx.fillText('VENUE', w / 2, detailsY + 190);
 
-  // English Address Top
+  // ALL CAPS English Venue Address
   ctx.fillStyle = '#ffffff';
-  ctx.font = '600 28px "Inter", sans-serif';
-  ctx.letterSpacing = '1px';
-  ctx.fillText('Alchemy Kobe', w / 2, detailsY + 235);
+  ctx.font = '700 28px "Inter", sans-serif';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('ALCHEMY KOBE', w / 2, detailsY + 235);
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
   ctx.font = '400 22px "Inter", sans-serif';
   ctx.fillText('3 Chome-5-5 Kitanagasadori, Chuo Ward, Kobe, Hyogo 650-0012', w / 2, detailsY + 275);
 
-  // Japanese Address Bottom
+  // ALL CAPS Japanese Venue Address
   ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-  ctx.font = '500 24px "Noto Sans JP", sans-serif';
-  ctx.fillText('アルケミー神戸', w / 2, detailsY + 325);
+  ctx.font = '700 24px "Noto Sans JP", sans-serif';
+  ctx.fillText('アルケミー KOBE', w / 2, detailsY + 325);
 
   ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
   ctx.font = '400 20px "Noto Sans JP", sans-serif';
@@ -936,17 +933,17 @@ async function renderIssuedList(){
     row.className = 'list-item';
     const isPerf = t.role === 'performer';
     const roleTag = isPerf ? 'PERFORMER' : 'CUSTOMER';
-    const icon = isPerf ? '<i class="bi bi-music-note-beamed" style="color:var(--purple-bright)"></i>' : '<i class="bi bi-person-fill" style="color:var(--gold)"></i>';
     const count = t.scanCount || 0;
     
+    // Clean layout without bi-bi icons
     row.innerHTML = `
       <div>
-        <div class="li-name">${icon} ${escapeHtml(t.name)}</div>
+        <div class="li-name">${escapeHtml(t.name)}</div>
         <div class="li-role">${roleTag}</div>
         <div class="li-id">${id}</div>
       </div>
       <div class="badge ${count > 0 ? 'used' : 'unused'}">
-        ${count > 0 ? `<i class="bi bi-check-circle-fill"></i> Scanned (${count})` : '<i class="bi bi-clock"></i> Unused'}
+        ${count > 0 ? `Scanned (${count})` : 'Unused'}
       </div>
     `;
     listEl.appendChild(row);
@@ -1113,7 +1110,6 @@ async function handleScan(id){
     historyNote = `<div class="result-history"><i class="bi bi-patch-check"></i> Initial check-in recorded</div>`;
   }
 
-  // COOL DISPLAY SCAN RESULT OVERLAY WITH ANIMATED GLOW & ICONS
   showOverlay(`
     <div class="result-card ${cardClass}">
       <div class="scan-count-badge"><i class="bi bi-arrow-repeat"></i> SCAN #${currentCount}</div>
