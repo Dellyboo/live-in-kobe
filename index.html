@@ -258,6 +258,7 @@
     font-weight:700;
     letter-spacing:0.04em;
     text-transform:uppercase;
+    white-space:nowrap;
   }
   .badge.unused{background:rgba(76,175,109,0.15);color:var(--green);}
   .badge.used{background:rgba(224,165,48,0.15);color:var(--amber);}
@@ -289,8 +290,9 @@
   }
 
   .result-card{
+    position:relative;
     border-radius:16px;
-    padding:26px 20px;
+    padding:30px 22px 26px;
     text-align:center;
     margin-bottom:16px;
     border:1px solid;
@@ -316,6 +318,56 @@
   .result-card.valid .result-status{color:var(--green);}
   .result-card.used .result-status{color:var(--amber);}
   .result-card.invalid .result-status{color:var(--red);}
+
+  /* Small corner badge showing scan/entry count */
+  .corner-badge{
+    position:absolute;
+    top:14px;
+    right:16px;
+    font-size:10px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    background:rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.12);
+    padding:4px 10px;
+    border-radius:20px;
+    font-weight:700;
+  }
+
+  /* Role chip inside scan result */
+  .role-chip{
+    display:inline-block;
+    margin:2px 0 12px;
+    padding:4px 13px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.07em;
+    text-transform:uppercase;
+  }
+  .role-chip.performer{
+    background:rgba(138,92,246,0.18);
+    color:#c4b5fd;
+    border:1px solid rgba(138,92,246,0.4);
+  }
+  .role-chip.customer{
+    background:rgba(226,184,87,0.18);
+    color:var(--gold-bright);
+    border:1px solid rgba(226,184,87,0.4);
+  }
+
+  /* Repeat-scan notice */
+  .result-repeat{
+    margin-top:12px;
+    padding:9px 12px;
+    background:rgba(224,165,48,0.1);
+    border:1px solid rgba(224,165,48,0.3);
+    border-radius:10px;
+    font-size:12px;
+    line-height:1.5;
+    color:var(--amber);
+  }
 
   #scan-overlay{
     position:fixed;
@@ -415,7 +467,7 @@
 
       <div class="ticket-result hidden" id="ticket-result">
         <div id="ticket-canvas-container">
-          <canvas id="ticket-canvas" width="600" height="980"></canvas>
+          <canvas id="ticket-canvas" width="600" height="1040"></canvas>
         </div>
         <button class="secondary" id="btn-download">Download Pass Image</button>
       </div>
@@ -514,6 +566,12 @@ const ticketResult = document.getElementById('ticket-result');
 const guestNameInput = document.getElementById('guest-name');
 let currentTicketId = '';
 
+// Logical drawing canvas size (the pass "design" coordinate system).
+// The actual canvas pixel buffer is rendered at RENDER_SCALE× this for a crisp, high-res download.
+const PASS_W = 600;
+const PASS_H = 1040;
+const RENDER_SCALE = 3; // 3x for print-quality / retina-sharp downloads
+
 btnGenerate.onclick = async () => {
   const name = guestNameInput.value.trim();
   if(!name){ guestNameInput.focus(); return; }
@@ -530,15 +588,22 @@ btnGenerate.onclick = async () => {
       throw new Error('QR library failed to load.');
     }
 
-    await setTicket(id, { name, role, used:false, usedAt:null, issuedAt: Date.now() });
+    await setTicket(id, {
+      name,
+      role,
+      issuedAt: Date.now(),
+      scanCount: 0,
+      firstScanAt: null,
+      lastScanAt: null
+    });
 
-    // Temp QR render
+    // Temp QR render (rendered large so it stays crisp when scaled down onto the high-res pass)
     const tempDiv = document.getElementById('temp-qrcode');
     tempDiv.innerHTML = '';
     new QRCode(tempDiv, {
       text: id,
-      width: 220,
-      height: 220,
+      width: 512,
+      height: 512,
       colorDark: '#0d0d11',
       colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.H
@@ -563,12 +628,22 @@ btnGenerate.onclick = async () => {
 
 async function drawModernPass(id, name, role, qrImg) {
   const canvas = document.getElementById('ticket-canvas');
+
+  // Render at RENDER_SCALE× resolution for a high-quality, crisp download,
+  // while all drawing code below still works in the simple PASS_W × PASS_H
+  // logical coordinate space.
+  canvas.width = PASS_W * RENDER_SCALE;
+  canvas.height = PASS_H * RENDER_SCALE;
+
   const ctx = canvas.getContext('2d');
-  
+  ctx.setTransform(RENDER_SCALE, 0, 0, RENDER_SCALE, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
   await document.fonts.ready;
 
-  const w = canvas.width;  // 600
-  const h = canvas.height; // 980
+  const w = PASS_W;   // 600
+  const h = PASS_H;   // 1040
   const isPerformer = role === 'performer';
 
   // 1. Dark Modern Background
@@ -667,7 +742,7 @@ async function drawModernPass(id, name, role, qrImg) {
   ctx.fillText('入場時にこのQRコードをご提示ください', w / 2, qrBoxY + 325);
 
   // 5. Event Details Footer
-  const detailsY = 675;
+  const detailsY = 650;
 
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
   ctx.beginPath();
@@ -692,7 +767,27 @@ async function drawModernPass(id, name, role, qrImg) {
 
   ctx.fillStyle = '#ffffff';
   ctx.font = '600 16px "Noto Sans JP", sans-serif';
+  ctx.letterSpacing = '0.5px';
   ctx.fillText('Alchemy Kobe (アルケミー神戸)', w / 2, detailsY + 142);
+
+  // Venue address — English first, then Japanese below
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+  ctx.font = '400 12.5px "Inter", sans-serif';
+  ctx.letterSpacing = '0.2px';
+  ctx.fillText('3 Chome-5-5 Kitanagasadori, Chuo Ward,', w / 2, detailsY + 166);
+  ctx.fillText('Kobe, Hyogo 650-0012', w / 2, detailsY + 184);
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
+  ctx.font = '400 12px "Noto Sans JP", sans-serif';
+  ctx.letterSpacing = '0px';
+  ctx.fillText('〒650-0012 兵庫県神戸市中央区北長狭通3丁目5-5', w / 2, detailsY + 208);
+
+  // Divider before closing note
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.beginPath();
+  ctx.moveTo(60, detailsY + 232);
+  ctx.lineTo(w - 60, detailsY + 232);
+  ctx.stroke();
 
   // Express Thank You Note at Bottom
   ctx.fillStyle = badgeColor;
@@ -741,13 +836,16 @@ async function renderIssuedList(){
     const row = document.createElement('div');
     row.className = 'list-item';
     const roleTag = t.role === 'performer' ? 'PERFORMER' : 'CUSTOMER';
+    const scanCount = t.scanCount || 0;
+    const badgeClass = scanCount > 0 ? 'used' : 'unused';
+    const badgeText = scanCount > 0 ? `Checked in ×${scanCount}` : 'Not scanned';
     row.innerHTML = `
       <div>
         <div class="li-name">${escapeHtml(t.name)}</div>
         <div class="li-role">${roleTag}</div>
         <div class="li-id">${id}</div>
       </div>
-      <div class="badge ${t.used ? 'used' : 'unused'}">${t.used ? 'Used' : 'Valid'}</div>
+      <div class="badge ${badgeClass}">${badgeText}</div>
     `;
     listEl.appendChild(row);
   }
@@ -835,6 +933,11 @@ function hideOverlay(){
   camStatus.style.color = '';
 }
 
+function formatTime(ts){
+  if(!ts) return '';
+  return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
 async function handleScan(id){
   showOverlay(`<div class="result-card"><div class="result-status" style="color:var(--gold-bright);">Checking…</div></div>`);
 
@@ -861,19 +964,16 @@ async function handleScan(id){
     return;
   }
 
-  if(t.used){
-    showOverlay(`
-      <div class="result-card used">
-        <div class="result-status">⚠ ALREADY USED</div>
-        <div class="result-guestname">${escapeHtml(t.name)}</div>
-        <div class="result-sub">Checked in at ${new Date(t.usedAt).toLocaleTimeString()}</div>
-        <button class="primary" onclick="hideOverlay()">Scan Next</button>
-      </div>`);
-    return;
-  }
+  // Tickets can be scanned more than once (e.g. guests stepping out and returning).
+  // We never block entry — we just track and surface how many times this pass has been used.
+  const prevScanCount = t.scanCount || 0;
+  const prevLastScanAt = t.lastScanAt || null;
+  const isRepeat = prevScanCount > 0;
 
-  t.used = true;
-  t.usedAt = Date.now();
+  t.scanCount = prevScanCount + 1;
+  if(!t.firstScanAt) t.firstScanAt = Date.now();
+  t.lastScanAt = Date.now();
+
   try{
     await setTicket(id, t);
   }catch(err){
@@ -886,13 +986,21 @@ async function handleScan(id){
     return;
   }
 
-  const roleTitle = t.role === 'performer' ? 'PERFORMER PASS' : 'GUEST PASS';
+  const roleTitle = t.role === 'performer' ? 'PERFORMER' : 'CUSTOMER';
+  const roleChipClass = t.role === 'performer' ? 'performer' : 'customer';
+
+  const repeatNote = isRepeat
+    ? `<div class="result-repeat">⟲ Already checked in ${prevScanCount}× before — last at ${formatTime(prevLastScanAt)}</div>`
+    : '';
 
   showOverlay(`
     <div class="result-card valid">
-      <div class="result-status">✓ VALID (${roleTitle})</div>
+      <div class="corner-badge">Entry #${t.scanCount}</div>
+      <div class="result-status">✓ VALID</div>
+      <div class="role-chip ${roleChipClass}">${roleTitle}</div>
       <div class="result-guestname">${escapeHtml(t.name)}</div>
-      <div class="result-sub">${id} · checked in now</div>
+      <div class="result-sub">${id} · checked in now (${formatTime(t.lastScanAt)})</div>
+      ${repeatNote}
       <button class="primary" onclick="hideOverlay()">Scan Next</button>
     </div>`);
   renderIssuedList();
