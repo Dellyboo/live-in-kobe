@@ -559,6 +559,99 @@
     gap: 6px;
   }
   .hidden{display:none !important;}
+
+  .spin{ animation: spin 1s linear infinite; display:inline-block; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* Passcode Gate */
+  #passcode-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(3,6,13,0.92);
+    backdrop-filter:blur(10px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:1000;
+    padding:24px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  #passcode-overlay.show{
+    opacity:1;
+    pointer-events:all;
+  }
+  #passcode-card{
+    max-width:340px;
+    width:100%;
+    background: linear-gradient(180deg, rgba(226,184,87,0.14), rgba(11,19,38,0.97));
+    border:1px solid rgba(226,184,87,0.35);
+    border-radius:22px;
+    padding:30px 24px 26px;
+    text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,0.9);
+    animation: bounceIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+  }
+  .passcode-icon{
+    width:64px;
+    height:64px;
+    margin:0 auto 14px;
+    border-radius:50%;
+    background:rgba(226,184,87,0.18);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    color:var(--gold-bright);
+  }
+  .passcode-title{
+    font-family:var(--serif);
+    font-size:20px;
+    font-weight:800;
+    color:var(--ink);
+    margin-bottom:4px;
+  }
+  .passcode-sub{
+    font-size:12.5px;
+    color:var(--ink-dim);
+    margin-bottom:18px;
+  }
+  #passcode-input{
+    width:100%;
+    text-align:center;
+    letter-spacing:6px;
+    font-size:22px;
+    font-weight:700;
+    font-family:'Inter',monospace;
+    background:var(--bg-panel-2);
+    border:1px solid rgba(255,255,255,0.15);
+    color:var(--ink);
+    padding:14px;
+    border-radius:12px;
+    margin-bottom:10px;
+  }
+  #passcode-input:focus{ outline:none; border-color:var(--gold); }
+  .passcode-error{
+    font-size:12px;
+    color:var(--red);
+    margin-bottom:6px;
+    min-height:14px;
+  }
+  .passcode-actions{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+  }
+  .passcode-actions button{ flex:1; margin-top:0; }
+  #passcode-card.shake{ animation: shakeX 0.4s; }
+  @keyframes shakeX{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-8px); }
+    40%{ transform:translateX(8px); }
+    60%{ transform:translateX(-6px); }
+    80%{ transform:translateX(6px); }
+  }
 </style>
 </head>
 <body>
@@ -576,7 +669,7 @@
   <div id="panel-issue">
     <div class="panel">
       <h2><i class="bi bi-plus-circle-fill"></i> New Pass</h2>
-      <p class="hint">Select pass type and enter full name to generate digital ticket pass.</p>
+      <p class="hint">Select pass type and enter full name to generate digital ticket pass. A staff passcode is required to issue a pass.</p>
       
       <label>Pass Type</label>
       <div class="role-selector">
@@ -608,7 +701,7 @@
         <input type="text" id="guest-name" placeholder="e.g. Aya Tanaka" />
       </div>
 
-      <button class="primary" id="btn-generate"><i class="bi bi-stars"></i> Generate Digital Pass</button>
+      <button class="primary" id="btn-generate"><i class="bi bi-lock-fill"></i> Generate Digital Pass</button>
 
       <div id="temp-qrcode" class="hidden"></div>
 
@@ -620,10 +713,10 @@
       </div>
     </div>
 
-    <!-- ISSUED PASSES COLLAPSIBLE PANEL -->
+    <!-- ISSUED PASSES COLLAPSIBLE PANEL (passcode protected) -->
     <div class="panel">
       <div class="panel-toggle-header" id="toggle-issued-btn">
-        <h2><i class="bi bi-journal-text"></i> Issued Passes</h2>
+        <h2><i class="bi bi-journal-lock"></i> Issued Passes</h2>
         <span class="issued-count-badge" id="issued-count">0</span>
         <i class="bi bi-chevron-down toggle-icon"></i>
       </div>
@@ -635,7 +728,7 @@
     </div>
   </div>
 
-  <!-- SCAN PANEL -->
+  <!-- SCAN PANEL (no passcode required) -->
   <div id="panel-scan" class="hidden">
     <div class="panel">
       <h2><i class="bi bi-camera-fill"></i> Camera Scan</h2>
@@ -658,6 +751,21 @@
 
   <div id="scan-overlay">
     <div id="scan-overlay-inner"></div>
+  </div>
+
+  <!-- PASSCODE GATE OVERLAY -->
+  <div id="passcode-overlay">
+    <div id="passcode-card">
+      <div class="passcode-icon"><i class="bi bi-lock-fill"></i></div>
+      <div class="passcode-title">Staff Passcode Required</div>
+      <div class="passcode-sub" id="passcode-sub">Enter the passcode to continue</div>
+      <input type="password" id="passcode-input" inputmode="numeric" maxlength="6" placeholder="#2323" autocomplete="off" />
+      <div class="passcode-error hidden" id="passcode-error">Incorrect passcode. Try again.</div>
+      <div class="passcode-actions">
+        <button class="secondary" id="passcode-cancel"><i class="bi bi-x-lg"></i> Cancel</button>
+        <button class="primary" id="passcode-submit"><i class="bi bi-unlock-fill"></i> Unlock</button>
+      </div>
+    </div>
   </div>
 
   <div class="footer-note"><i class="bi bi-geo-alt-fill"></i> ALCHEMY KOBE · Sun Sept 13, 2026</div>
@@ -718,31 +826,95 @@ tabScan.onclick = () => {
   startCamera();
 };
 
-// ---------- Collapsible Issued Passes Accordion ----------
+// ---------- Passcode Gate ----------
+// Staff passcode required to (1) generate a new pass, (2) open the Issued Passes list.
+// Scanning at the door never requires it. Once entered correctly, it stays
+// unlocked for the rest of this browser session (until the page is reloaded).
+const REQUIRED_PASSCODE = '#2323';
+let passcodeUnlocked = false;
+let pendingPasscodeAction = null;
+
+const passcodeOverlay = document.getElementById('passcode-overlay');
+const passcodeCard = document.getElementById('passcode-card');
+const passcodeInput = document.getElementById('passcode-input');
+const passcodeError = document.getElementById('passcode-error');
+const passcodeSub = document.getElementById('passcode-sub');
+
+function openPasscodeGate(action, subText){
+  if(passcodeUnlocked){ action(); return; }
+  pendingPasscodeAction = action;
+  passcodeSub.textContent = subText || 'Enter the passcode to continue';
+  passcodeInput.value = '';
+  passcodeError.classList.add('hidden');
+  passcodeOverlay.classList.add('show');
+  setTimeout(() => passcodeInput.focus(), 50);
+}
+
+function closePasscodeGate(){
+  passcodeOverlay.classList.remove('show');
+  pendingPasscodeAction = null;
+}
+
+function submitPasscode(){
+  const val = passcodeInput.value.trim();
+  if(val === REQUIRED_PASSCODE){
+    passcodeUnlocked = true;
+    const action = pendingPasscodeAction;
+    closePasscodeGate();
+    if(action) action();
+  }else{
+    passcodeError.classList.remove('hidden');
+    passcodeInput.value = '';
+    passcodeInput.focus();
+    passcodeCard.classList.remove('shake');
+    void passcodeCard.offsetWidth; // restart animation
+    passcodeCard.classList.add('shake');
+  }
+}
+
+document.getElementById('passcode-cancel').onclick = closePasscodeGate;
+document.getElementById('passcode-submit').onclick = submitPasscode;
+passcodeInput.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') submitPasscode();
+});
+// Restrict input to digits and # only (the passcode is digits-only including the #)
+passcodeInput.addEventListener('input', () => {
+  passcodeInput.value = passcodeInput.value.replace(/[^0-9#]/g, '');
+});
+
+// ---------- Collapsible Issued Passes Accordion (passcode protected) ----------
 const toggleIssuedBtn = document.getElementById('toggle-issued-btn');
 const issuedPassesWrapper = document.getElementById('issued-passes-wrapper');
 
 toggleIssuedBtn.onclick = () => {
-  const isHidden = issuedPassesWrapper.classList.contains('hidden');
-  if (isHidden) {
-    issuedPassesWrapper.classList.remove('hidden');
-    toggleIssuedBtn.classList.add('open');
-  } else {
-    issuedPassesWrapper.classList.add('hidden');
-    toggleIssuedBtn.classList.remove('open');
-  }
+  openPasscodeGate(() => {
+    const isHidden = issuedPassesWrapper.classList.contains('hidden');
+    if (isHidden) {
+      issuedPassesWrapper.classList.remove('hidden');
+      toggleIssuedBtn.classList.add('open');
+    } else {
+      issuedPassesWrapper.classList.add('hidden');
+      toggleIssuedBtn.classList.remove('open');
+    }
+  }, 'Enter the passcode to view issued passes');
 };
 
-// ---------- Pass Generation & Drawing ----------
+// ---------- Pass Generation & Drawing (passcode protected) ----------
 const btnGenerate = document.getElementById('btn-generate');
 const ticketResult = document.getElementById('ticket-result');
 const guestNameInput = document.getElementById('guest-name');
 let currentTicketId = '';
 
-btnGenerate.onclick = async () => {
+btnGenerate.onclick = () => {
   const name = guestNameInput.value.trim();
   if(!name){ guestNameInput.focus(); return; }
-  
+  openPasscodeGate(doGeneratePass, 'Enter the passcode to issue this pass');
+};
+
+async function doGeneratePass(){
+  const name = guestNameInput.value.trim();
+  if(!name){ guestNameInput.focus(); return; }
+
   const role = document.querySelector('input[name="pass-role"]:checked').value;
   btnGenerate.disabled = true;
   btnGenerate.innerHTML = `<i class="bi bi-arrow-repeat spin"></i> Creating Pass…`;
@@ -787,9 +959,9 @@ btnGenerate.onclick = async () => {
     alert('Could not generate ticket: ' + (err && err.message ? err.message : err));
   }finally{
     btnGenerate.disabled = false;
-    btnGenerate.innerHTML = `<i class="bi bi-stars"></i> Generate Digital Pass`;
+    btnGenerate.innerHTML = `<i class="bi bi-lock-fill"></i> Generate Digital Pass`;
   }
-};
+}
 
 async function drawModernPass(id, name, role, qrImg) {
   const canvas = document.getElementById('ticket-canvas');
@@ -1003,7 +1175,7 @@ function escapeHtml(s){
   return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-// ---------- Scanner Logic ----------
+// ---------- Scanner Logic (no passcode required) ----------
 let stream = null;
 let scanLoopId = null;
 const video = document.getElementById('video');
