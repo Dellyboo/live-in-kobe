@@ -759,7 +759,7 @@
       <div class="passcode-icon"><i class="bi bi-lock-fill"></i></div>
       <div class="passcode-title">Staff Passcode Required</div>
       <div class="passcode-sub" id="passcode-sub">Enter the passcode to continue</div>
-      <input type="password" id="passcode-input" inputmode="numeric" maxlength="6" placeholder="#...." autocomplete="off" />
+      <input type="password" id="passcode-input" inputmode="numeric" maxlength="6" placeholder="#2323" autocomplete="off" />
       <div class="passcode-error hidden" id="passcode-error">Incorrect passcode. Try again.</div>
       <div class="passcode-actions">
         <button class="secondary" id="passcode-cancel"><i class="bi bi-x-lg"></i> Cancel</button>
@@ -830,7 +830,7 @@ tabScan.onclick = () => {
 // Staff passcode required to (1) generate a new pass, (2) open the Issued Passes list.
 // Scanning at the door never requires it. Once entered correctly, it stays
 // unlocked for the rest of this browser session (until the page is reloaded).
-const REQUIRED_PASSCODE = '#....';
+const REQUIRED_PASSCODE = '#2323';
 let passcodeUnlocked = false;
 let pendingPasscodeAction = null;
 
@@ -887,11 +887,20 @@ const toggleIssuedBtn = document.getElementById('toggle-issued-btn');
 const issuedPassesWrapper = document.getElementById('issued-passes-wrapper');
 
 toggleIssuedBtn.onclick = () => {
-  openPasscodeGate(() => {
+  openPasscodeGate(async () => {
     const isHidden = issuedPassesWrapper.classList.contains('hidden');
     if (isHidden) {
       issuedPassesWrapper.classList.remove('hidden');
       toggleIssuedBtn.classList.add('open');
+      // Always pull the latest tickets straight from the database
+      // when the panel is opened, so staff never see a stale list.
+      const emptyEl = document.getElementById('issued-empty');
+      const listEl = document.getElementById('issued-list');
+      listEl.innerHTML = '';
+      emptyEl.classList.remove('hidden');
+      emptyEl.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> Loading issued passes…';
+      await renderIssuedList();
+      emptyEl.innerHTML = 'No passes issued yet.';
     } else {
       issuedPassesWrapper.classList.add('hidden');
       toggleIssuedBtn.classList.remove('open');
