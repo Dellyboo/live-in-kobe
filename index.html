@@ -759,7 +759,7 @@
       <div class="passcode-icon"><i class="bi bi-lock-fill"></i></div>
       <div class="passcode-title">Staff Passcode Required</div>
       <div class="passcode-sub" id="passcode-sub">Enter the passcode to continue</div>
-      <input type="password" id="passcode-input" inputmode="numeric" maxlength="6" placeholder="#...." autocomplete="off" />
+      <input type="password" id="passcode-input" inputmode="numeric" maxlength="6" placeholder="#2323" autocomplete="off" />
       <div class="passcode-error hidden" id="passcode-error">Incorrect passcode. Try again.</div>
       <div class="passcode-actions">
         <button class="secondary" id="passcode-cancel"><i class="bi bi-x-lg"></i> Cancel</button>
@@ -791,15 +791,10 @@ async function setTicket(id, data){
 }
 
 async function getAllTickets(){
-  try{
-    const res = await fetch(`${FIREBASE_URL}/tickets.json`);
-    if(!res.ok) throw new Error('Firebase request failed: ' + res.status);
-    const data = await res.json();
-    return data || {};
-  }catch(e){
-    console.error('getAllTickets failed:', e);
-    return {};
-  }
+  const res = await fetch(`${FIREBASE_URL}/tickets.json`);
+  if(!res.ok) throw new Error('Firebase request failed: ' + res.status);
+  const data = await res.json();
+  return data || {};
 }
 
 function genId(){
@@ -830,7 +825,7 @@ tabScan.onclick = () => {
 // Staff passcode required to (1) generate a new pass, (2) open the Issued Passes list.
 // Scanning at the door never requires it. Once entered correctly, it stays
 // unlocked for the rest of this browser session (until the page is reloaded).
-const REQUIRED_PASSCODE = '#....';
+const REQUIRED_PASSCODE = '#2323';
 let passcodeUnlocked = false;
 let pendingPasscodeAction = null;
 
@@ -844,10 +839,13 @@ function openPasscodeGate(action, subText){
   if(passcodeUnlocked){ action(); return; }
   pendingPasscodeAction = action;
   passcodeSub.textContent = subText || 'Enter the passcode to continue';
-  passcodeInput.value = '';
+  passcodeInput.value = '#';
   passcodeError.classList.add('hidden');
   passcodeOverlay.classList.add('show');
-  setTimeout(() => passcodeInput.focus(), 50);
+  setTimeout(() => {
+    passcodeInput.focus();
+    passcodeInput.setSelectionRange(passcodeInput.value.length, passcodeInput.value.length);
+  }, 50);
 }
 
 function closePasscodeGate(){
@@ -864,8 +862,9 @@ function submitPasscode(){
     if(action) action();
   }else{
     passcodeError.classList.remove('hidden');
-    passcodeInput.value = '';
+    passcodeInput.value = '#';
     passcodeInput.focus();
+    passcodeInput.setSelectionRange(passcodeInput.value.length, passcodeInput.value.length);
     passcodeCard.classList.remove('shake');
     void passcodeCard.offsetWidth; // restart animation
     passcodeCard.classList.add('shake');
@@ -877,9 +876,12 @@ document.getElementById('passcode-submit').onclick = submitPasscode;
 passcodeInput.addEventListener('keydown', (e) => {
   if(e.key === 'Enter') submitPasscode();
 });
-// Restrict input to digits and # only (the passcode is digits-only including the #)
+// Restrict input to digits and # only (the passcode is digits-only including the #),
+// and keep the leading # in place since the passcode always starts with it.
 passcodeInput.addEventListener('input', () => {
-  passcodeInput.value = passcodeInput.value.replace(/[^0-9#]/g, '');
+  let v = passcodeInput.value.replace(/[^0-9#]/g, '');
+  if(!v.startsWith('#')) v = '#' + v.replace(/#/g, '');
+  passcodeInput.value = v;
 });
 
 // ---------- Collapsible Issued Passes Accordion (passcode protected) ----------
@@ -900,7 +902,6 @@ toggleIssuedBtn.onclick = () => {
       emptyEl.classList.remove('hidden');
       emptyEl.innerHTML = '<i class="bi bi-arrow-repeat spin"></i> Loading issued passes…';
       await renderIssuedList();
-      emptyEl.innerHTML = 'No passes issued yet.';
     } else {
       issuedPassesWrapper.classList.add('hidden');
       toggleIssuedBtn.classList.remove('open');
@@ -1145,18 +1146,31 @@ document.getElementById('btn-download').onclick = () => {
 };
 
 async function renderIssuedList(){
-  const all = await getAllTickets();
   const listEl = document.getElementById('issued-list');
   const emptyEl = document.getElementById('issued-empty');
   const countBadge = document.getElementById('issued-count');
   listEl.innerHTML = '';
+
+  let all;
+  try{
+    all = await getAllTickets();
+  }catch(e){
+    console.error('renderIssuedList failed:', e);
+    emptyEl.classList.remove('hidden');
+    emptyEl.innerHTML = `<i class="bi bi-exclamation-triangle"></i> Could not load passes from the database (${escapeHtml(e.message || 'network error')}). Check your Firebase rules/connection and try again.`;
+    return;
+  }
 
   const entries = Object.entries(all).sort((a, b) => (b[1].issuedAt||0) - (a[1].issuedAt||0));
 
   // Update total pass count badge
   countBadge.textContent = entries.length;
 
-  if(entries.length === 0){ emptyEl.classList.remove('hidden'); return; }
+  if(entries.length === 0){
+    emptyEl.classList.remove('hidden');
+    emptyEl.innerHTML = 'No passes issued yet.';
+    return;
+  }
   emptyEl.classList.add('hidden');
 
   for(const [id, t] of entries.slice(0, 50)){
